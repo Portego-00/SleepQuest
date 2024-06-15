@@ -1,14 +1,6 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React from 'react';
-import type {PropsWithChildren} from 'react';
+import type { PropsWithChildren } from 'react';
 import {
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -16,7 +8,6 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-
 import {
   Colors,
   DebugInstructions,
@@ -24,12 +15,16 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
+function Section({ children, title }: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
@@ -55,43 +50,75 @@ function Section({children, title}: SectionProps): React.JSX.Element {
   );
 }
 
-function App(): React.JSX.Element {
+function HomeScreen(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+  return (
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      style={backgroundStyle}>
+      <Header />
+      <View
+        style={{
+          backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        }}>
+        <Section title="Step One">
+          Edit <Text style={styles.highlight}>SleepQuest.tsx</Text> to change this
+          screen and then come back to see your edits.
+        </Section>
+        <Section title="See Your Changes">
+          <ReloadInstructions />
+        </Section>
+        <Section title="Debug">
+          <DebugInstructions />
+        </Section>
+        <Section title="Learn More">
+          Read the docs to discover what to do next:
+        </Section>
+        <LearnMoreLinks />
+      </View>
+    </ScrollView>
+  );
+}
+
+function SettingsScreen(): React.JSX.Element {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Settings Screen</Text>
+    </View>
+  )
+}
+
+function AnalyticsScreen(): React.JSX.Element {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Analytics Screen</Text>
+    </View>
+  )
+}
+
+const Tab = createBottomTabNavigator();
+
+function App(): React.JSX.Element {
+  const isDarkMode = useColorScheme() === 'dark';
+
+  const backgroundStyle = {
+    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    flex: 1,
+  };
 
   return (
     <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>SleepQuest.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+      <NavigationContainer>
+        <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveBackgroundColor: Colors.darker, tabBarInactiveBackgroundColor: Colors.darker, tabBarStyle: { backgroundColor: isDarkMode ? Colors.darker : Colors.lighter} }}>
+          <Tab.Screen name="Home" component={HomeScreen} />
+          <Tab.Screen name="Analytics" component={AnalyticsScreen} />
+          <Tab.Screen name="Profile" component={SettingsScreen} />
+        </Tab.Navigator>
+      </NavigationContainer>
     </SafeAreaView>
   );
 }

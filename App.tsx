@@ -1,13 +1,6 @@
 import React from 'react';
-import type { PropsWithChildren } from 'react';
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import type {PropsWithChildren} from 'react';
+import {ScrollView, StyleSheet, Text, useColorScheme, View} from 'react-native';
 import {
   Colors,
   DebugInstructions,
@@ -15,16 +8,15 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {NavigationContainer} from '@react-navigation/native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-function Section({ children, title }: SectionProps): React.JSX.Element {
+function Section({children, title}: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
@@ -66,8 +58,8 @@ function HomeScreen(): React.JSX.Element {
           backgroundColor: isDarkMode ? Colors.black : Colors.white,
         }}>
         <Section title="Step One">
-          Edit <Text style={styles.highlight}>SleepQuest.tsx</Text> to change this
-          screen and then come back to see your edits.
+          Edit <Text style={styles.highlight}>SleepQuest.tsx</Text> to change
+          this screen and then come back to see your edits.
         </Section>
         <Section title="See Your Changes">
           <ReloadInstructions />
@@ -86,18 +78,18 @@ function HomeScreen(): React.JSX.Element {
 
 function SettingsScreen(): React.JSX.Element {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
       <Text>Settings Screen</Text>
     </View>
-  )
+  );
 }
 
 function AnalyticsScreen(): React.JSX.Element {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
       <Text>Analytics Screen</Text>
     </View>
-  )
+  );
 }
 
 const Tab = createBottomTabNavigator();
@@ -113,7 +105,15 @@ function App(): React.JSX.Element {
   return (
     <SafeAreaView style={backgroundStyle}>
       <NavigationContainer>
-        <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveBackgroundColor: Colors.darker, tabBarInactiveBackgroundColor: Colors.darker, tabBarStyle: { backgroundColor: isDarkMode ? Colors.darker : Colors.lighter} }}>
+        <Tab.Navigator
+          screenOptions={{
+            headerShown: false,
+            tabBarActiveBackgroundColor: Colors.darker,
+            tabBarInactiveBackgroundColor: Colors.darker,
+            tabBarStyle: {
+              backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+            },
+          }}>
           <Tab.Screen name="Home" component={HomeScreen} />
           <Tab.Screen name="Analytics" component={AnalyticsScreen} />
           <Tab.Screen name="Profile" component={SettingsScreen} />

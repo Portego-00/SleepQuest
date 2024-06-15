@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import type {PropsWithChildren} from 'react';
 import {ScrollView, StyleSheet, Text, useColorScheme, View} from 'react-native';
 import {
@@ -11,6 +11,18 @@ import {
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+
+import AppleHealthKit, {
+  HealthValue,
+  HealthKitPermissions,
+} from 'react-native-health';
+
+const permissions = {
+  permissions: {
+    read: [AppleHealthKit.Constants.Permissions.SleepAnalysis],
+    write: [],
+  },
+};
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -43,34 +55,61 @@ function Section({children, title}: SectionProps): React.JSX.Element {
 }
 
 function HomeScreen(): React.JSX.Element {
+  const [sleepData, setSleepData] = useState<HealthValue[]>([]);
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  useEffect(() => {
+    // Request permissions on component mount
+    AppleHealthKit.initHealthKit(permissions, err => {
+      if (err) {
+        console.log('error initializing Healthkit: ', err);
+        return;
+      }
+
+      // Fetch sleep data for the past week
+      const options = {
+        startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+        endDate: new Date().toISOString(),
+      };
+
+      AppleHealthKit.getSleepSamples(options, (err, results) => {
+        if (err) {
+          console.log('error fetching sleep data: ', err);
+          return;
+        }
+        setSleepData(results);
+        console.log('Sleep data: ', results);
+      });
+    });
+  }, []);
+
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       style={backgroundStyle}>
       <Header />
-      <View
-        style={{
-          backgroundColor: isDarkMode ? Colors.black : Colors.white,
-        }}>
-        <Section title="Step One">
-          Edit <Text style={styles.highlight}>SleepQuest.tsx</Text> to change
-          this screen and then come back to see your edits.
+      <View style={{backgroundColor: isDarkMode ? Colors.black : Colors.white}}>
+        <Section title="Sleep Data">
+          {sleepData.length === 0 ? (
+            <Text>No sleep data available.</Text>
+          ) : (
+            sleepData.map((data, index) => (
+              <View key={index} style={styles.dataContainer}>
+                <Text style={{color: 'white'}}>
+                  Start: {new Date(data.startDate).toLocaleString()}
+                </Text>
+                <Text style={{color: 'white'}}>
+                  End: {new Date(data.endDate).toLocaleString()}
+                </Text>
+                <Text style={{color: 'white'}}>Value: {data.value}</Text>
+              </View>
+            ))
+          )}
         </Section>
-        <Section title="See Your Changes">
-          <ReloadInstructions />
-        </Section>
-        <Section title="Debug">
-          <DebugInstructions />
-        </Section>
-        <Section title="Learn More">
-          Read the docs to discover what to do next:
-        </Section>
-        <LearnMoreLinks />
       </View>
     </ScrollView>
   );
@@ -139,6 +178,9 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontWeight: '700',
+  },
+  dataContainer: {
+    marginTop: 16,
   },
 });
 

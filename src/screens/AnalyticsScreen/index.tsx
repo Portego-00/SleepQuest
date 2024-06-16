@@ -2,21 +2,27 @@ import React from 'react';
 import Header from '../../components/Header';
 import Card from '../../components/Card';
 import {View, StyleSheet} from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 
 const AnalyticsScreen = () => {
   return (
-    <View style={styles.backgroundStyle}>
-      <Header title="Hello" />
-      <Card title="Hello"></Card>
-    </View>
+    <LinearGradient
+      colors={['#0A1733', '#020812']}
+      style={styles.backgroundStyle}>
+      <View style={styles.container}>
+        <Header title="Hello" />
+        <Card title="Hello" />
+      </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   backgroundStyle: {
-    padding: 20,
-    backgroundColor: '#1F3B4D',
     flex: 1,
+  },
+  container: {
+    padding: 20,
     paddingTop: 80,
   },
 });

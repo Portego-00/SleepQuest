@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unstable-nested-components */
 import React, {useEffect, useState} from 'react';
 import type {PropsWithChildren} from 'react';
 import {ScrollView, StyleSheet, Text, useColorScheme, View} from 'react-native';
@@ -6,6 +7,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AnalyticsScreen from './src/screens/AnalyticsScreen';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import AppleHealthKit, {HealthValue} from 'react-native-health';
 
@@ -121,7 +123,7 @@ function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    backgroundColor: isDarkMode ? '#020812' : Colors.lighter,
     flex: 1,
   };
 
@@ -129,14 +131,33 @@ function App(): React.JSX.Element {
     <SafeAreaView style={backgroundStyle}>
       <NavigationContainer>
         <Tab.Navigator
-          screenOptions={{
+          screenOptions={({route}) => ({
             headerShown: false,
-            tabBarActiveBackgroundColor: Colors.darker,
-            tabBarInactiveBackgroundColor: Colors.darker,
+            tabBarActiveBackgroundColor: '#020812',
+            tabBarInactiveBackgroundColor: '#020812',
             tabBarStyle: {
-              backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+              backgroundColor: isDarkMode ? '#020812' : Colors.lighter,
             },
-          }}>
+            tabBarActiveTintColor: 'white',
+            tabBarLabelStyle: {
+              fontSize: 13,
+              fontWeight: '600',
+              fontFamily: 'Nunito-Bold',
+            },
+            tabBarIcon: ({focused, color, size}) => {
+              let iconName;
+              if (route.name === 'Home') {
+                iconName = focused ? 'home' : 'home-outline';
+              } else if (route.name === 'Analytics') {
+                iconName = focused ? 'analytics' : 'analytics-outline';
+              } else if (route.name === 'Profile') {
+                iconName = focused ? 'person' : 'person-outline';
+              }
+              return (
+                <Ionicons name={iconName || ''} size={size} color={color} />
+              );
+            },
+          })}>
           <Tab.Screen name="Home" component={HomeScreen} />
           <Tab.Screen name="Analytics" component={AnalyticsScreen} />
           <Tab.Screen name="Profile" component={SettingsScreen} />

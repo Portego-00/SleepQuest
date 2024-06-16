@@ -1,21 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import type {PropsWithChildren} from 'react';
 import {ScrollView, StyleSheet, Text, useColorScheme, View} from 'react-native';
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {Colors, Header} from 'react-native/Libraries/NewAppScreen';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import AnalyticsScreen from './src/screens/AnalyticsScreen';
 
-import AppleHealthKit, {
-  HealthValue,
-  HealthKitPermissions,
-} from 'react-native-health';
+import AppleHealthKit, {HealthValue} from 'react-native-health';
 
 const permissions = {
   permissions: {
@@ -119,14 +111,6 @@ function SettingsScreen(): React.JSX.Element {
   return (
     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
       <Text>Settings Screen</Text>
-    </View>
-  );
-}
-
-function AnalyticsScreen(): React.JSX.Element {
-  return (
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-      <Text>Analytics Screen</Text>
     </View>
   );
 }

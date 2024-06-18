@@ -15,9 +15,9 @@ const Header = ({title}: HeaderProps) => {
 
 const styles = StyleSheet.create({
   title: {
-    fontSize: 18,
+    fontSize: 24,
     fontFamily: 'Nunito-Bold',
-    fontWeight: 'bold',
+    fontWeight: '900',
     marginBottom: 8,
     color: '#D2D5D9',
   },

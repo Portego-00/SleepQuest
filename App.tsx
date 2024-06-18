@@ -137,6 +137,7 @@ function App(): React.JSX.Element {
             tabBarInactiveBackgroundColor: '#020812',
             tabBarStyle: {
               backgroundColor: isDarkMode ? '#020812' : Colors.lighter,
+              height: 90,
             },
             tabBarActiveTintColor: 'white',
             tabBarLabelStyle: {

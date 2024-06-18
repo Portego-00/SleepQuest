@@ -1,23 +1,17 @@
 import React, {ReactNode} from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 
 type CardProps = {
-  title?: string;
   children?: ReactNode;
 };
 
-const Card = ({title, children}: CardProps) => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
-      {children}
-    </View>
-  );
+const Card = ({children}: CardProps) => {
+  return <View style={styles.container}>{children}</View>;
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: '#353d61',
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
@@ -29,11 +23,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
   },
 });
 

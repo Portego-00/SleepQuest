@@ -66,7 +66,7 @@ function HomeScreen(): React.JSX.Element {
 
       // Fetch sleep data for the past week
       const options = {
-        startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+        startDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
         endDate: new Date().toISOString(),
       };
 
@@ -76,10 +76,78 @@ function HomeScreen(): React.JSX.Element {
           return;
         }
         setSleepData(results);
-        console.log('Sleep data: ', results);
       });
     });
   }, []);
+
+  const mergeIntervals = (intervals: [string, string][]) => {
+    if (intervals.length === 0) {
+      return [];
+    }
+
+    // Sort intervals by start date
+    intervals.sort((a, b) => (a[0] < b[0] ? -1 : 1));
+
+    const merged = [intervals[0]];
+
+    for (let i = 1; i < intervals.length; i++) {
+      const lastMerged = merged[merged.length - 1];
+      const current = intervals[i];
+
+      if (current[0] <= lastMerged[1]) {
+        // If the current interval overlaps with the last merged interval, merge them
+        lastMerged[1] = lastMerged[1] > current[1] ? lastMerged[1] : current[1];
+      } else {
+        // Otherwise, add the current interval to the list of merged intervals
+        merged.push(current);
+      }
+    }
+
+    return merged;
+  };
+
+  const formatDate = (date: string): string => {
+    const formattedDate = new Date(date).toLocaleTimeString();
+    return formattedDate;
+  };
+
+  const renderSleepData = () => {
+    if (sleepData.length === 0) {
+      return <Text>No sleep data available.</Text>;
+    }
+
+    const groupedData = sleepData.reduce((acc: any, data: any) => {
+      if (!acc[data.value]) {
+        acc[data.value] = [];
+      }
+      acc[data.value].push([data.startDate, data.endDate]);
+      return acc;
+    }, {});
+
+    const mergedData: {[key: string]: [string, string][]} = Object.fromEntries(
+      Object.entries(groupedData).map(([key, intervals]) => [
+        key,
+        mergeIntervals(intervals as [string, string][]),
+      ]),
+    );
+
+    return (
+      <View style={styles.dataContainer}>
+        {Object.entries(mergedData).map(([value, intervals]) => (
+          <View key={value} style={styles.dataContainer}>
+            <Text style={styles.dataText}>{value}</Text>
+            {intervals.map((interval: [string, string], index: number) => (
+              <View key={index} style={styles.dateContainer}>
+                <Text style={styles.dateTitle}>
+                  {formatDate(interval[0])} - {formatDate(interval[1])}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ))}
+      </View>
+    );
+  };
 
   return (
     <ScrollView
@@ -87,23 +155,7 @@ function HomeScreen(): React.JSX.Element {
       style={backgroundStyle}>
       <Header />
       <View style={{backgroundColor: isDarkMode ? Colors.black : Colors.white}}>
-        <Section title="Sleep Data">
-          {sleepData.length === 0 ? (
-            <Text>No sleep data available.</Text>
-          ) : (
-            sleepData.map((data, index) => (
-              <View key={index} style={styles.dataContainer}>
-                <Text style={{color: 'white'}}>
-                  Start: {new Date(data.startDate).toLocaleString()}
-                </Text>
-                <Text style={{color: 'white'}}>
-                  End: {new Date(data.endDate).toLocaleString()}
-                </Text>
-                <Text style={{color: 'white'}}>Value: {data.value}</Text>
-              </View>
-            ))
-          )}
-        </Section>
+        <Section title="Sleep Data">{renderSleepData()}</Section>
       </View>
     </ScrollView>
   );
@@ -186,7 +238,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   dataContainer: {
-    marginTop: 16,
+    marginTop: 30,
+  },
+  dateContainer: {
+    marginTop: 10,
+  },
+  dateTitle: {
+    fontSize: 16,
+    color: '#D2D5D9',
+  },
+  dataText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#D2D5D9',
   },
 });
 

@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Header from '../../components/Header';
 import Card from '../../components/Card';
-import {View, StyleSheet, Text} from 'react-native';
+import {View, StyleSheet, Text, Animated} from 'react-native';
 import {ProgressChart} from 'react-native-chart-kit';
 import {calculateScoreColor} from './utils';
 import Background from '../../components/Background';
@@ -24,38 +24,34 @@ const AnalyticsScreen = () => {
   });
   const initialScore = days.find(day => day.day === currentDay)?.score || 0;
 
-  const [score, setScore] = useState(initialScore);
   const [dayScore, setDayScore] = useState(initialScore);
-  const [prevDayScore, setPrevDayScore] = useState(0);
+  const [currentAnimatedValue, setCurrentAnimatedValue] =
+    useState(initialScore);
+  const animatedScore = useRef(new Animated.Value(initialScore)).current;
 
   useEffect(() => {
-    const duration = 1000;
-    const startTime = Date.now();
+    const id = animatedScore.addListener(({value}) => {
+      setCurrentAnimatedValue(value);
+    });
 
-    const updateScore = () => {
-      const currentTime = Date.now();
-      const elapsedTime = currentTime - startTime;
-      if (elapsedTime >= duration) {
-        setScore(dayScore);
-      } else {
-        const progress = elapsedTime / duration;
-        const easedProgress = 1 - Math.pow(1 - progress, 2);
-        const newScore =
-          prevDayScore + easedProgress * (dayScore - prevDayScore);
-        setScore(newScore);
-        requestAnimationFrame(updateScore);
-      }
+    return () => {
+      animatedScore.removeListener(id);
     };
+  }, [animatedScore]);
 
-    requestAnimationFrame(updateScore);
-  }, [dayScore, prevDayScore]);
+  useEffect(() => {
+    Animated.timing(animatedScore, {
+      toValue: dayScore,
+      duration: 1000,
+      useNativeDriver: false,
+    }).start();
+  }, [animatedScore, dayScore]);
 
-  const scoreColor = calculateScoreColor(score);
+  const scoreColor = calculateScoreColor(dayScore);
 
   const handleDayChange = (day: string) => {
     const selectedDay = days.find(d => d.day === day);
     if (selectedDay) {
-      setPrevDayScore(score);
       setDayScore(selectedDay.score);
     }
   };
@@ -68,9 +64,9 @@ const AnalyticsScreen = () => {
         <Card>
           <View style={styles.scoreContainer}>
             <View style={styles.scoreChartContainer}>
-              <ProgressChart
+              <AnimatedProgressChart
                 data={{
-                  data: [score],
+                  data: [animatedScore],
                 }}
                 width={140}
                 height={140}
@@ -81,7 +77,8 @@ const AnalyticsScreen = () => {
                   backgroundGradientFrom: '#fff',
                   backgroundGradientTo: '#fff',
                   decimalPlaces: 2,
-                  color: (opacity = 1) => calculateScoreColor(score, opacity),
+                  color: (opacity = 1) =>
+                    calculateScoreColor(dayScore, opacity),
                   labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                   propsForDots: {
                     r: '6',
@@ -97,7 +94,7 @@ const AnalyticsScreen = () => {
             <View style={styles.scoreInfoContainer}>
               <Text style={styles.scoreInfoTitle}>Score</Text>
               <Text style={[styles.scoreInfoText, {color: scoreColor}]}>
-                {Math.round(score * 1000)}
+                {Math.round(currentAnimatedValue * 1000)}
               </Text>
             </View>
           </View>
@@ -106,6 +103,8 @@ const AnalyticsScreen = () => {
     </Background>
   );
 };
+
+const AnimatedProgressChart = Animated.createAnimatedComponent(ProgressChart);
 
 const styles = StyleSheet.create({
   container: {

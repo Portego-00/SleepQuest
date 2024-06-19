@@ -1,12 +1,19 @@
 import React, {ReactNode} from 'react';
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
 
 type CardProps = {
   children?: ReactNode;
+  onPress?: () => void;
 };
 
-const Card = ({children}: CardProps) => {
-  return <View style={styles.container}>{children}</View>;
+const Card = ({children, onPress}: CardProps) => {
+  return onPress ? (
+    <TouchableOpacity style={styles.container} onPress={onPress}>
+      {children}
+    </TouchableOpacity>
+  ) : (
+    <View style={styles.container}>{children}</View>
+  );
 };
 
 const styles = StyleSheet.create({

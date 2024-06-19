@@ -2,49 +2,68 @@ import React, {useEffect, useState} from 'react';
 import Header from '../../components/Header';
 import Card from '../../components/Card';
 import {View, StyleSheet, Text} from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import {ProgressChart} from 'react-native-chart-kit';
+import {calculateScoreColor} from './utils';
+import Background from '../../components/Background';
+import WeekDays from './components/WeekDays/WeekDays';
+
+const days = [
+  {day: 'Mon', score: 0.82},
+  {day: 'Tue', score: 0.634},
+  {day: 'Wed', score: 0.744},
+  {day: 'Thu', score: 0.912},
+  {day: 'Fri', score: 0.589},
+  {day: 'Sat', score: 0.425},
+  {day: 'Sun', score: 0.656},
+];
 
 const AnalyticsScreen = () => {
-  const [score, setScore] = useState(0);
-  const targetScore = 0.827;
+  const currentDate = new Date();
+  const currentDay = currentDate.toLocaleDateString('en-US', {
+    weekday: 'short',
+  });
+  const initialScore = days.find(day => day.day === currentDay)?.score || 0;
+
+  const [score, setScore] = useState(initialScore);
+  const [dayScore, setDayScore] = useState(initialScore);
+  const [prevDayScore, setPrevDayScore] = useState(0);
 
   useEffect(() => {
     const duration = 1000;
     const startTime = Date.now();
+
     const updateScore = () => {
       const currentTime = Date.now();
       const elapsedTime = currentTime - startTime;
       if (elapsedTime >= duration) {
-        setScore(targetScore);
+        setScore(dayScore);
       } else {
         const progress = elapsedTime / duration;
         const easedProgress = 1 - Math.pow(1 - progress, 2);
-        const newScore = easedProgress * targetScore;
+        const newScore =
+          prevDayScore + easedProgress * (dayScore - prevDayScore);
         setScore(newScore);
         requestAnimationFrame(updateScore);
       }
     };
-    requestAnimationFrame(updateScore);
-  }, []);
 
-  const calculateScoreColor = (score: number, opacity?: number): string => {
-    const red = Math.round((1 - score) * 255);
-    const green = Math.round(score * 255);
-    const blue = 0;
-    if (opacity) {
-      return `rgba(${red}, ${green}, ${blue}, ${opacity})`;
-    }
-    return `rgb(${red}, ${green}, ${blue})`;
-  };
+    requestAnimationFrame(updateScore);
+  }, [dayScore, prevDayScore]);
 
   const scoreColor = calculateScoreColor(score);
 
+  const handleDayChange = (day: string) => {
+    const selectedDay = days.find(d => d.day === day);
+    if (selectedDay) {
+      setPrevDayScore(score);
+      setDayScore(selectedDay.score);
+    }
+  };
+
   return (
-    <LinearGradient
-      colors={['#0A1733', '#020812']}
-      style={styles.backgroundStyle}>
+    <Background>
       <View style={styles.container}>
+        <WeekDays days={days} onChangeDay={handleDayChange} />
         <Header title="Score" />
         <Card>
           <View style={styles.scoreContainer}>
@@ -64,9 +83,6 @@ const AnalyticsScreen = () => {
                   decimalPlaces: 2,
                   color: (opacity = 1) => calculateScoreColor(score, opacity),
                   labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                  style: {
-                    borderRadius: 50,
-                  },
                   propsForDots: {
                     r: '6',
                     strokeWidth: '2',
@@ -87,14 +103,11 @@ const AnalyticsScreen = () => {
           </View>
         </Card>
       </View>
-    </LinearGradient>
+    </Background>
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundStyle: {
-    flex: 1,
-  },
   container: {
     padding: 20,
     paddingTop: 80,

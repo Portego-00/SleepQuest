@@ -18,17 +18,20 @@ const WeekDays = ({days, onChangeDay}: WeekDaysProps) => {
   };
 
   return (
-    <View style={styles.container}>
-      {days.map(({day, score}) => (
-        <DayChart
-          key={day}
-          day={day}
-          score={score}
-          isSelected={selectedDay === day}
-          onPress={handleDayPress}
-        />
-      ))}
-    </View>
+    <>
+      <View style={styles.container}>
+        {days.map(({day, score}) => (
+          <DayChart
+            key={day}
+            day={day}
+            score={score}
+            isSelected={selectedDay === day}
+            onPress={handleDayPress}
+          />
+        ))}
+      </View>
+      <View style={styles.separationLine} />
+    </>
   );
 };
 
@@ -36,6 +39,12 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  separationLine: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#D2D5D9',
+    opacity: 0.5,
   },
 });
 

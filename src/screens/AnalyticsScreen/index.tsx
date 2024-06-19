@@ -1,11 +1,8 @@
-import React, {useEffect, useRef, useState} from 'react';
-import Header from '../../components/Header';
-import Card from '../../components/Card';
-import {View, StyleSheet, Text, Animated} from 'react-native';
-import {ProgressChart} from 'react-native-chart-kit';
-import {calculateScoreColor} from './utils';
+import React, {useState} from 'react';
+import {View, StyleSheet, ScrollView} from 'react-native';
 import Background from '../../components/Background';
 import WeekDays from './components/WeekDays/WeekDays';
+import ScoreSection from './components/ScoreSection/ScoreSection';
 
 const days = [
   {day: 'Mon', score: 0.82},
@@ -18,93 +15,33 @@ const days = [
 ];
 
 const AnalyticsScreen = () => {
-  const currentDate = new Date();
-  const currentDay = currentDate.toLocaleDateString('en-US', {
-    weekday: 'short',
-  });
-  const initialScore = days.find(day => day.day === currentDay)?.score || 0;
-
-  const [dayScore, setDayScore] = useState(initialScore);
-  const [currentAnimatedValue, setCurrentAnimatedValue] =
-    useState(initialScore);
-  const animatedScore = useRef(new Animated.Value(initialScore)).current;
-
-  useEffect(() => {
-    const id = animatedScore.addListener(({value}) => {
-      setCurrentAnimatedValue(value);
-    });
-
-    return () => {
-      animatedScore.removeListener(id);
-    };
-  }, [animatedScore]);
-
-  useEffect(() => {
-    Animated.timing(animatedScore, {
-      toValue: dayScore,
-      duration: 1000,
-      useNativeDriver: false,
-    }).start();
-  }, [animatedScore, dayScore]);
-
-  const scoreColor = calculateScoreColor(dayScore);
+  const [selecteqDay, setSelectedDay] = useState<string | null>(
+    new Date().toLocaleString('en-us', {weekday: 'short'}),
+  );
 
   const handleDayChange = (day: string) => {
-    const selectedDay = days.find(d => d.day === day);
-    if (selectedDay) {
-      setDayScore(selectedDay.score);
-    }
+    setSelectedDay(day);
   };
 
   return (
     <Background>
       <View style={styles.container}>
         <WeekDays days={days} onChangeDay={handleDayChange} />
-        <Header title="Score" />
-        <Card>
-          <View style={styles.scoreContainer}>
-            <View style={styles.scoreChartContainer}>
-              <AnimatedProgressChart
-                data={{
-                  data: [animatedScore],
-                }}
-                width={140}
-                height={140}
-                strokeWidth={15}
-                radius={50}
-                chartConfig={{
-                  backgroundColor: 'transparent',
-                  backgroundGradientFrom: '#fff',
-                  backgroundGradientTo: '#fff',
-                  decimalPlaces: 2,
-                  color: (opacity = 1) =>
-                    calculateScoreColor(dayScore, opacity),
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                  propsForDots: {
-                    r: '6',
-                    strokeWidth: '2',
-                    stroke: '#ffa726',
-                  },
-                }}
-                hideLegend={true}
-                style={styles.scoreChart}
-              />
-            </View>
-            <View style={styles.scoreSpacer} />
-            <View style={styles.scoreInfoContainer}>
-              <Text style={styles.scoreInfoTitle}>Score</Text>
-              <Text style={[styles.scoreInfoText, {color: scoreColor}]}>
-                {Math.round(currentAnimatedValue * 1000)}
-              </Text>
-            </View>
-          </View>
-        </Card>
+        <ScrollView
+          style={styles.pageScrollView}
+          showsVerticalScrollIndicator={false}>
+          <ScoreSection selectedDay={selecteqDay} />
+          <ScoreSection selectedDay={selecteqDay} />
+          <ScoreSection selectedDay={selecteqDay} />
+          <ScoreSection selectedDay={selecteqDay} />
+          <ScoreSection selectedDay={selecteqDay} />
+          <ScoreSection selectedDay={selecteqDay} />
+          <View style={styles.bottomSpacer} />
+        </ScrollView>
       </View>
     </Background>
   );
 };
-
-const AnimatedProgressChart = Animated.createAnimatedComponent(ProgressChart);
 
 const styles = StyleSheet.create({
   container: {
@@ -140,6 +77,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito-Bold',
     fontWeight: '900',
     color: '#D2D5D9',
+  },
+  pageScrollView: {
+    height: '100%',
+    paddingTop: 20,
+  },
+  bottomSpacer: {
+    height: 100,
   },
 });
 

@@ -1,15 +1,16 @@
-/* eslint-disable react/no-unstable-nested-components */
 import React, {useEffect, useState} from 'react';
-import type {PropsWithChildren} from 'react';
-import {ScrollView, StyleSheet, Text, useColorScheme, View} from 'react-native';
-import {Colors, Header} from 'react-native/Libraries/NewAppScreen';
+import {Text, useColorScheme, View} from 'react-native';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AnalyticsScreen from './src/screens/AnalyticsScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
 import AppleHealthKit, {HealthValue} from 'react-native-health';
+import {ProcessedSleepData} from './src/utils/types';
+import {getProcessedSleepData} from './src/utils/utils';
+import HomeScreen from './src/screens/HomeScreen';
+import Background from './src/components/Background';
 
 const permissions = {
   permissions: {
@@ -18,42 +19,38 @@ const permissions = {
   },
 };
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+function SettingsScreen(): React.JSX.Element {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
+    <Background>
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text
+          style={{fontFamily: 'Nuunito-Bold', fontSize: 24, color: '#B0B3B8'}}>
+          Profile Screen
+        </Text>
+      </View>
+    </Background>
   );
 }
+const HomeTabScreen = ({sleepData}: {sleepData: HealthValue[]}) => (
+  <HomeScreen sleepData={sleepData} />
+);
+const AnalyticsTabScreen = ({
+  processedSleepData,
+}: {
+  processedSleepData: ProcessedSleepData;
+}) => <AnalyticsScreen processedSleepData={processedSleepData} />;
 
-function HomeScreen(): React.JSX.Element {
+const Tab = createBottomTabNavigator();
+
+function App(): React.JSX.Element {
   const [sleepData, setSleepData] = useState<HealthValue[]>([]);
+  const [processedSleepData, setProcessedSleepData] =
+    useState<ProcessedSleepData>({});
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    backgroundColor: isDarkMode ? '#020812' : Colors.lighter,
+    flex: 1,
   };
 
   useEffect(() => {
@@ -66,7 +63,7 @@ function HomeScreen(): React.JSX.Element {
 
       // Fetch sleep data for the past week
       const options = {
-        startDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+        startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
         endDate: new Date().toISOString(),
       };
 
@@ -76,108 +73,10 @@ function HomeScreen(): React.JSX.Element {
           return;
         }
         setSleepData(results);
+        setProcessedSleepData(getProcessedSleepData(results));
       });
     });
   }, []);
-
-  const mergeIntervals = (intervals: [string, string][]) => {
-    if (intervals.length === 0) {
-      return [];
-    }
-
-    // Sort intervals by start date
-    intervals.sort((a, b) => (a[0] < b[0] ? -1 : 1));
-
-    const merged = [intervals[0]];
-
-    for (let i = 1; i < intervals.length; i++) {
-      const lastMerged = merged[merged.length - 1];
-      const current = intervals[i];
-
-      if (current[0] <= lastMerged[1]) {
-        // If the current interval overlaps with the last merged interval, merge them
-        lastMerged[1] = lastMerged[1] > current[1] ? lastMerged[1] : current[1];
-      } else {
-        // Otherwise, add the current interval to the list of merged intervals
-        merged.push(current);
-      }
-    }
-
-    return merged;
-  };
-
-  const formatDate = (date: string): string => {
-    const formattedDate = new Date(date).toLocaleTimeString();
-    return formattedDate;
-  };
-
-  const renderSleepData = () => {
-    if (sleepData.length === 0) {
-      return <Text>No sleep data available.</Text>;
-    }
-
-    const groupedData = sleepData.reduce((acc: any, data: any) => {
-      if (!acc[data.value]) {
-        acc[data.value] = [];
-      }
-      acc[data.value].push([data.startDate, data.endDate]);
-      return acc;
-    }, {});
-
-    const mergedData: {[key: string]: [string, string][]} = Object.fromEntries(
-      Object.entries(groupedData).map(([key, intervals]) => [
-        key,
-        mergeIntervals(intervals as [string, string][]),
-      ]),
-    );
-
-    return (
-      <View style={styles.dataContainer}>
-        {Object.entries(mergedData).map(([value, intervals]) => (
-          <View key={value} style={styles.dataContainer}>
-            <Text style={styles.dataText}>{value}</Text>
-            {intervals.map((interval: [string, string], index: number) => (
-              <View key={index} style={styles.dateContainer}>
-                <Text style={styles.dateTitle}>
-                  {formatDate(interval[0])} - {formatDate(interval[1])}
-                </Text>
-              </View>
-            ))}
-          </View>
-        ))}
-      </View>
-    );
-  };
-
-  return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      style={backgroundStyle}>
-      <Header />
-      <View style={{backgroundColor: isDarkMode ? Colors.black : Colors.white}}>
-        <Section title="Sleep Data">{renderSleepData()}</Section>
-      </View>
-    </ScrollView>
-  );
-}
-
-function SettingsScreen(): React.JSX.Element {
-  return (
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-      <Text>Settings Screen</Text>
-    </View>
-  );
-}
-
-const Tab = createBottomTabNavigator();
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? '#020812' : Colors.lighter,
-    flex: 1,
-  };
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -211,47 +110,22 @@ function App(): React.JSX.Element {
               );
             },
           })}>
-          <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Analytics" component={AnalyticsScreen} />
+          <Tab.Screen name="Home">
+            {props => <HomeTabScreen {...props} sleepData={sleepData} />}
+          </Tab.Screen>
+          <Tab.Screen name="Analytics">
+            {props => (
+              <AnalyticsTabScreen
+                {...props}
+                processedSleepData={processedSleepData}
+              />
+            )}
+          </Tab.Screen>
           <Tab.Screen name="Profile" component={SettingsScreen} />
         </Tab.Navigator>
       </NavigationContainer>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  dataContainer: {
-    marginTop: 30,
-  },
-  dateContainer: {
-    marginTop: 10,
-  },
-  dateTitle: {
-    fontSize: 16,
-    color: '#D2D5D9',
-  },
-  dataText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#D2D5D9',
-  },
-});
 
 export default App;

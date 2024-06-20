@@ -3,6 +3,7 @@ import {View, StyleSheet, ScrollView} from 'react-native';
 import Background from '../../components/Background';
 import WeekDays from './components/WeekDays/WeekDays';
 import ScoreSection from './components/ScoreSection/ScoreSection';
+import { ProcessedSleepData } from '../../utils/types';
 
 const days = [
   {day: 'Mon', score: 0.82},
@@ -14,7 +15,11 @@ const days = [
   {day: 'Sun', score: 0.656},
 ];
 
-const AnalyticsScreen = () => {
+type AnalyticsScreenProps = {
+  processedSleepData: ProcessedSleepData;
+};
+
+const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
   const [selecteqDay, setSelectedDay] = useState<string | null>(
     new Date().toLocaleString('en-us', {weekday: 'short'}),
   );

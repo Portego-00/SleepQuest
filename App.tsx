@@ -67,9 +67,9 @@ function App(): React.JSX.Element {
         endDate: new Date().toISOString(),
       };
 
-      AppleHealthKit.getSleepSamples(options, (err, results) => {
+      AppleHealthKit.getSleepSamples(options, (getSamplesError, results) => {
         if (err) {
-          console.log('error fetching sleep data: ', err);
+          console.log('error fetching sleep data: ', getSamplesError);
           return;
         }
         setSleepData(results);

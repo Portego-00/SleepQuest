@@ -48,7 +48,7 @@ const AnalyticsScreen = ({sleepData}: HomeScreenProps) => {
   };
 
   const formatDate = (date: string): string => {
-    const formattedDate = new Date(date).toLocaleTimeString();
+    const formattedDate = new Date(date).toLocaleString();
     return formattedDate;
   };
 

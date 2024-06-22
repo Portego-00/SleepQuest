@@ -3,7 +3,7 @@ import {View, StyleSheet, ScrollView} from 'react-native';
 import Background from '../../components/Background';
 import WeekDays from './components/WeekDays/WeekDays';
 import ScoreSection from './components/ScoreSection/ScoreSection';
-import { ProcessedSleepData } from '../../utils/types';
+import {ProcessedSleepData, SleepInterval} from '../../utils/types';
 
 const days = [
   {day: 'Mon', score: 0.82},
@@ -19,9 +19,65 @@ type AnalyticsScreenProps = {
   processedSleepData: ProcessedSleepData;
 };
 
+enum SleepType {
+  INBED = 'INBED',
+  CORE = 'CORE',
+  REM = 'REM',
+  DEEP = 'DEEP',
+}
+
 const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
-  const [selecteqDay, setSelectedDay] = useState<string | null>(
+  const [selectedDay, setSelectedDay] = useState<string | null>(
     new Date().toLocaleString('en-us', {weekday: 'short'}),
+  );
+
+  const getSleepDataForDay = (day: string, type: SleepType) => {
+    const dayIndex = days.findIndex(d => d.day === day);
+    if (dayIndex === -1) return [];
+
+    const startOfDay = new Date();
+    startOfDay.setDate(
+      startOfDay.getDate() - (((startOfDay.getDay() + 6) % 7) - dayIndex),
+    );
+    startOfDay.setHours(17, 0, 0, 0);
+
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setDate(endOfDay.getDate() + 1);
+    endOfDay.setHours(16, 59, 59, 999);
+
+    return processedSleepData[type]?.filter(data => {
+      const start = new Date(data.start);
+      const end = new Date(data.end);
+      return (
+        (start >= startOfDay && start <= endOfDay) ||
+        (end >= startOfDay && end <= endOfDay)
+      );
+    });
+  };
+
+  const sleepDataForSelectedDay = selectedDay
+    ? getSleepDataForDay(selectedDay, SleepType.DEEP)
+    : [];
+
+  console.log(sleepDataForSelectedDay);
+
+  const calculateTotalTime = () => {
+    let totalTime = 0;
+    sleepDataForSelectedDay.forEach(data => {
+      const start = new Date(data.start);
+      const end = new Date(data.end);
+      const duration = end.getTime() - start.getTime();
+      totalTime += duration;
+    });
+    return totalTime;
+  };
+
+  const totalTime = calculateTotalTime();
+  console.log(
+    'Total Time:',
+    `${Math.floor(totalTime / 3600000)} hours ${Math.floor(
+      (totalTime % 3600000) / 60000,
+    )} minutes ${Math.floor((totalTime % 60000) / 1000)} seconds`,
   );
 
   const handleDayChange = (day: string) => {
@@ -35,12 +91,12 @@ const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
         <ScrollView
           style={styles.pageScrollView}
           showsVerticalScrollIndicator={false}>
-          <ScoreSection selectedDay={selecteqDay} />
-          <ScoreSection selectedDay={selecteqDay} />
-          <ScoreSection selectedDay={selecteqDay} />
-          <ScoreSection selectedDay={selecteqDay} />
-          <ScoreSection selectedDay={selecteqDay} />
-          <ScoreSection selectedDay={selecteqDay} />
+          <ScoreSection selectedDay={selectedDay} />
+          <ScoreSection selectedDay={selectedDay} />
+          <ScoreSection selectedDay={selectedDay} />
+          <ScoreSection selectedDay={selectedDay} />
+          <ScoreSection selectedDay={selectedDay} />
+          <ScoreSection selectedDay={selectedDay} />
           <View style={styles.bottomSpacer} />
         </ScrollView>
       </View>

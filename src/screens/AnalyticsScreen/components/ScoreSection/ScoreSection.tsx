@@ -4,6 +4,8 @@ import Card from '../../../../components/Card';
 import {ProgressChart} from 'react-native-chart-kit';
 import {calculateScoreColor} from '../../utils';
 import Header from '../../../../components/Header';
+import {SleepInterval} from '../../../../utils/types';
+import {calculateScore, calculateTotalTime} from '../../../../utils/utils';
 
 const days = [
   {day: 'Mon', score: 0.82},
@@ -16,10 +18,13 @@ const days = [
 ];
 
 type CardSectionProps = {
-  selectedDay: string | null;
+  deepSleepData: SleepInterval[];
+  remSleepData: SleepInterval[];
+  coreSleepData: SleepInterval[];
+  inBedData: SleepInterval[];
 };
 
-const CardSection = ({selectedDay}: CardSectionProps) => {
+const CardSection = (props: CardSectionProps) => {
   const currentDate = new Date();
   const currentDay = currentDate.toLocaleDateString('en-US', {
     weekday: 'short',
@@ -41,10 +46,21 @@ const CardSection = ({selectedDay}: CardSectionProps) => {
     };
   }, [animatedScore]);
 
+  const totalDeepTime = calculateTotalTime(props.deepSleepData);
+  const totalRemTime = calculateTotalTime(props.remSleepData);
+  const totalCoreTime = calculateTotalTime(props.coreSleepData);
+  const totalInBedTime = calculateTotalTime(props.inBedData);
+  const totalSleepTime = totalDeepTime + totalRemTime + totalCoreTime;
+
   useEffect(() => {
-    const newScore = days.find(day => day.day === selectedDay)?.score || 0;
+    const newScore = calculateScore(
+      totalDeepTime,
+      totalRemTime,
+      totalCoreTime,
+      totalInBedTime,
+    );
     setDayScore(newScore);
-  }, [selectedDay]);
+  }, [totalDeepTime, totalRemTime, totalCoreTime, totalInBedTime]);
 
   useEffect(() => {
     Animated.timing(animatedScore, {
@@ -93,6 +109,18 @@ const CardSection = ({selectedDay}: CardSectionProps) => {
             <Text style={[styles.scoreInfoText, {color: scoreColor}]}>
               {Math.round(currentAnimatedValue * 1000)}
             </Text>
+            <Text style={styles.scoreInfoTitle}>Total Sleep Time</Text>
+            <Text style={styles.timeText}>
+              {`${Math.floor(totalSleepTime / 3600000)} hours ${Math.floor(
+                (totalSleepTime % 3600000) / 60000,
+              )} minutes`}
+            </Text>
+            <Text style={styles.scoreInfoTitle}>Total Time in Bed</Text>
+            <Text style={styles.timeText}>
+              {`${Math.floor(totalInBedTime / 3600000)} hours ${Math.floor(
+                (totalInBedTime % 3600000) / 60000,
+              )} minutes`}
+            </Text>
           </View>
         </View>
       </Card>
@@ -131,6 +159,11 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontFamily: 'Nunito-Bold',
     fontWeight: '900',
+    color: '#D2D5D9',
+  },
+  timeText: {
+    fontSize: 16,
+    fontFamily: 'Nunito-Regular',
     color: '#D2D5D9',
   },
 });

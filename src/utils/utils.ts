@@ -49,3 +49,107 @@ export const getProcessedSleepData = (
 
   return mergedData;
 };
+
+export enum SleepType {
+  INBED = 'INBED',
+  CORE = 'CORE',
+  REM = 'REM',
+  DEEP = 'DEEP',
+}
+
+const days = [
+  {day: 'Mon', score: 0.82},
+  {day: 'Tue', score: 0.634},
+  {day: 'Wed', score: 0.744},
+  {day: 'Thu', score: 0.912},
+  {day: 'Fri', score: 0.589},
+  {day: 'Sat', score: 0.425},
+  {day: 'Sun', score: 0.656},
+];
+
+export const getSleepDataForDay = (
+  day: string,
+  type: SleepType,
+  processedSleepData: ProcessedSleepData,
+): SleepInterval[] => {
+  const dayIndex = days.findIndex(d => d.day === day);
+  if (dayIndex === -1) return [];
+
+  const startOfDay = new Date();
+  startOfDay.setDate(
+    startOfDay.getDate() - (((startOfDay.getDay() + 6) % 7) - dayIndex),
+  );
+  startOfDay.setHours(17, 0, 0, 0);
+
+  const endOfDay = new Date(startOfDay);
+  endOfDay.setDate(endOfDay.getDate() + 1);
+  endOfDay.setHours(16, 59, 59, 999);
+
+  return processedSleepData[type]?.filter(data => {
+    const start = new Date(data.start);
+    const end = new Date(data.end);
+    return (
+      (start >= startOfDay && start <= endOfDay) ||
+      (end >= startOfDay && end <= endOfDay)
+    );
+  });
+};
+
+export const calculateTotalTime = (sleepData: SleepInterval[]) => {
+  let totalTime = 0;
+  sleepData.forEach(data => {
+    const start = new Date(data.start);
+    const end = new Date(data.end);
+    const duration = end.getTime() - start.getTime();
+    totalTime += duration;
+  });
+  return totalTime;
+};
+
+const SLEEP_EFFICIENCY_SCORE_VALUE = 0.2; // 30%
+const SLEEP_TIME_SCORE_VALUE = 0.4; // 40%
+const DEEP_SLEEP_SCORE_VALUE = 0.2; // 20%
+const REM_SLEEP_SCORE_VALUE = 0.1; // 10%
+
+export const calculateScore = (
+  deepSleepTime: number,
+  remSleepTime: number,
+  coreSleepTime: number,
+  inBedTime: number,
+): number => {
+  if (inBedTime === 0) return 0;
+
+  const totalSleepTime = deepSleepTime + remSleepTime + coreSleepTime;
+  const sleepEfficiency = totalSleepTime / inBedTime;
+
+  let score = 0;
+
+  // Sleep efficiency score (50% is 0 points and 100% is 1 point)
+  score += 2 * (sleepEfficiency - 0.5) * SLEEP_EFFICIENCY_SCORE_VALUE;
+
+  // Sleep time score (4 hours is 0 points and 8 hours, or anything above is 1 point)
+  let sleepTimeScore = 0;
+  if (totalSleepTime < 4 * 3600000) {
+    sleepTimeScore = 0;
+  } else if (totalSleepTime >= 4 * 3600000 && totalSleepTime < 8 * 3600000) {
+    sleepTimeScore = (totalSleepTime - 4 * 3600000) / (4 * 3600000);
+  } else {
+    sleepTimeScore = 1;
+  }
+
+  score += sleepTimeScore * SLEEP_TIME_SCORE_VALUE;
+
+  // Deep sleep score (30 minutes is 0 points and 90 minutes, or anything above is 1 point)
+  let deepSleepScore = 0;
+  if (deepSleepTime < 30 * 3600000) {
+    deepSleepScore = 0;
+  } else if (deepSleepTime >= 30 * 3600000 && deepSleepTime < 90 * 3600000) {
+    deepSleepScore = (deepSleepTime - 30 * 3600000) / (60 * 3600000);
+  } else {
+    deepSleepScore = 1;
+  }
+
+  score += deepSleepScore * DEEP_SLEEP_SCORE_VALUE;
+
+  return score;
+};

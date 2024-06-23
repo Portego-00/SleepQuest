@@ -4,6 +4,7 @@ import Background from '../../components/Background';
 import WeekDays from './components/WeekDays/WeekDays';
 import ScoreSection from './components/ScoreSection/ScoreSection';
 import {ProcessedSleepData, SleepInterval} from '../../utils/types';
+import {SleepType, getSleepDataForDay} from '../../utils/utils';
 
 const days = [
   {day: 'Mon', score: 0.82},
@@ -19,51 +20,30 @@ type AnalyticsScreenProps = {
   processedSleepData: ProcessedSleepData;
 };
 
-enum SleepType {
-  INBED = 'INBED',
-  CORE = 'CORE',
-  REM = 'REM',
-  DEEP = 'DEEP',
-}
-
 const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
   const [selectedDay, setSelectedDay] = useState<string | null>(
     new Date().toLocaleString('en-us', {weekday: 'short'}),
   );
 
-  const getSleepDataForDay = (day: string, type: SleepType) => {
-    const dayIndex = days.findIndex(d => d.day === day);
-    if (dayIndex === -1) return [];
-
-    const startOfDay = new Date();
-    startOfDay.setDate(
-      startOfDay.getDate() - (((startOfDay.getDay() + 6) % 7) - dayIndex),
-    );
-    startOfDay.setHours(17, 0, 0, 0);
-
-    const endOfDay = new Date(startOfDay);
-    endOfDay.setDate(endOfDay.getDate() + 1);
-    endOfDay.setHours(16, 59, 59, 999);
-
-    return processedSleepData[type]?.filter(data => {
-      const start = new Date(data.start);
-      const end = new Date(data.end);
-      return (
-        (start >= startOfDay && start <= endOfDay) ||
-        (end >= startOfDay && end <= endOfDay)
-      );
-    });
-  };
-
-  const sleepDataForSelectedDay = selectedDay
-    ? getSleepDataForDay(selectedDay, SleepType.DEEP)
+  const deepSleepForSelectedDay = selectedDay
+    ? getSleepDataForDay(selectedDay, SleepType.DEEP, processedSleepData)
     : [];
 
-  console.log(sleepDataForSelectedDay);
+  const remSleepForSelectedDay = selectedDay
+    ? getSleepDataForDay(selectedDay, SleepType.REM, processedSleepData)
+    : [];
 
-  const calculateTotalTime = () => {
+  const coreSleepForSelectedDay = selectedDay
+    ? getSleepDataForDay(selectedDay, SleepType.CORE, processedSleepData)
+    : [];
+
+  const inBedForSelectedDay = selectedDay
+    ? getSleepDataForDay(selectedDay, SleepType.INBED, processedSleepData)
+    : [];
+
+  const calculateTotalTime = (sleepData: SleepInterval[]) => {
     let totalTime = 0;
-    sleepDataForSelectedDay.forEach(data => {
+    sleepData.forEach(data => {
       const start = new Date(data.start);
       const end = new Date(data.end);
       const duration = end.getTime() - start.getTime();
@@ -72,12 +52,16 @@ const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
     return totalTime;
   };
 
-  const totalTime = calculateTotalTime();
+  const totalDeepTime = calculateTotalTime(deepSleepForSelectedDay);
+  const totalRemTime = calculateTotalTime(remSleepForSelectedDay);
+  const totalCoreTime = calculateTotalTime(coreSleepForSelectedDay);
+  const totalSleepTime = totalDeepTime + totalRemTime + totalCoreTime;
+
   console.log(
-    'Total Time:',
-    `${Math.floor(totalTime / 3600000)} hours ${Math.floor(
-      (totalTime % 3600000) / 60000,
-    )} minutes ${Math.floor((totalTime % 60000) / 1000)} seconds`,
+    'Total Sleep Time:',
+    `${Math.floor(totalSleepTime / 3600000)} hours ${Math.floor(
+      (totalSleepTime % 3600000) / 60000,
+    )} minutes ${Math.floor((totalSleepTime % 60000) / 1000)} seconds`,
   );
 
   const handleDayChange = (day: string) => {
@@ -91,12 +75,12 @@ const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
         <ScrollView
           style={styles.pageScrollView}
           showsVerticalScrollIndicator={false}>
-          <ScoreSection selectedDay={selectedDay} />
-          <ScoreSection selectedDay={selectedDay} />
-          <ScoreSection selectedDay={selectedDay} />
-          <ScoreSection selectedDay={selectedDay} />
-          <ScoreSection selectedDay={selectedDay} />
-          <ScoreSection selectedDay={selectedDay} />
+          <ScoreSection
+            deepSleepData={deepSleepForSelectedDay}
+            remSleepData={remSleepForSelectedDay}
+            coreSleepData={coreSleepForSelectedDay}
+            inBedData={inBedForSelectedDay}
+          />
           <View style={styles.bottomSpacer} />
         </ScrollView>
       </View>

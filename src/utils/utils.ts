@@ -97,6 +97,7 @@ export const getSleepDataForDay = (
 
 export const calculateTotalTime = (sleepData: SleepInterval[]) => {
   let totalTime = 0;
+  if (!sleepData || sleepData.length === 0) return totalTime;
   sleepData.forEach(data => {
     const start = new Date(data.start);
     const end = new Date(data.end);
@@ -141,15 +142,31 @@ export const calculateScore = (
 
   // Deep sleep score (30 minutes is 0 points and 90 minutes, or anything above is 1 point)
   let deepSleepScore = 0;
-  if (deepSleepTime < 30 * 3600000) {
+  if (deepSleepTime < 0.25 * 3600000) {
     deepSleepScore = 0;
-  } else if (deepSleepTime >= 30 * 3600000 && deepSleepTime < 90 * 3600000) {
-    deepSleepScore = (deepSleepTime - 30 * 3600000) / (60 * 3600000);
+  } else if (
+    deepSleepTime >= 0.25 * 3600000 &&
+    deepSleepTime < 1.25 * 3600000
+  ) {
+    deepSleepScore = (deepSleepTime - 0.5 * 3600000) / 3600000;
   } else {
     deepSleepScore = 1;
   }
 
   score += deepSleepScore * DEEP_SLEEP_SCORE_VALUE;
+
+  // REM sleep score (45 minutes is 0 points and 105 minutes, or anything above is 1 point)
+  let remSleepScore = 0;
+
+  if (remSleepTime < 0.75 * 3600000) {
+    remSleepScore = 0;
+  } else if (remSleepTime >= 0.75 * 3600000 && remSleepTime < 1.75 * 3600000) {
+    remSleepScore = (remSleepTime - 0.75 * 3600000) / 3600000;
+  } else {
+    remSleepScore = 1;
+  }
+
+  score += remSleepScore * REM_SLEEP_SCORE_VALUE;
 
   return score;
 };

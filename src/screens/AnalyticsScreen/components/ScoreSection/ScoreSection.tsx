@@ -87,9 +87,8 @@ const CardSection = (props: CardSectionProps) => {
               strokeWidth={15}
               radius={50}
               chartConfig={{
-                backgroundColor: 'transparent',
-                backgroundGradientFrom: '#fff',
-                backgroundGradientTo: '#fff',
+                backgroundGradientToOpacity: 0,
+                backgroundGradientFromOpacity: 0,
                 decimalPlaces: 2,
                 color: (opacity = 1) => calculateScoreColor(dayScore, opacity),
                 labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
@@ -109,13 +108,13 @@ const CardSection = (props: CardSectionProps) => {
             <Text style={[styles.scoreInfoText, {color: scoreColor}]}>
               {Math.round(currentAnimatedValue * 1000)}
             </Text>
-            <Text style={styles.scoreInfoTitle}>Total Sleep Time</Text>
+            <Text style={styles.scoreInfoTitle}>Sleep Time</Text>
             <Text style={styles.timeText}>
               {`${Math.floor(totalSleepTime / 3600000)} hours ${Math.floor(
                 (totalSleepTime % 3600000) / 60000,
               )} minutes`}
             </Text>
-            <Text style={styles.scoreInfoTitle}>Total Time in Bed</Text>
+            <Text style={styles.scoreInfoTitle}>Time in Bed</Text>
             <Text style={styles.timeText}>
               {`${Math.floor(totalInBedTime / 3600000)} hours ${Math.floor(
                 (totalInBedTime % 3600000) / 60000,
@@ -141,6 +140,7 @@ const styles = StyleSheet.create({
   scoreChartContainer: {
     width: '45%',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   scoreInfoContainer: {
     width: '45%',

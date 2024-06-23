@@ -1,15 +1,20 @@
 import React, {useState} from 'react';
 import {View, StyleSheet} from 'react-native';
 import DayChart from './DayChart';
+import {ProcessedSleepData} from '../../../../utils/types';
 
 type WeekDaysProps = {
-  days: {day: string; score: number}[];
+  days: {day: string; date: Date}[];
   onChangeDay: (day: string) => void;
+  sleepData: ProcessedSleepData;
 };
 
-const WeekDays = ({days, onChangeDay}: WeekDaysProps) => {
+const WeekDays = ({days, onChangeDay, sleepData}: WeekDaysProps) => {
   const [selectedDay, setSelectedDay] = useState<string | null>(
-    new Date().toLocaleString('en-us', {weekday: 'short'}),
+    new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toLocaleString(
+      'en-us',
+      {weekday: 'short'},
+    ),
   );
 
   const handleDayPress = (day: string) => {
@@ -20,13 +25,14 @@ const WeekDays = ({days, onChangeDay}: WeekDaysProps) => {
   return (
     <>
       <View style={styles.container}>
-        {days.map(({day, score}) => (
+        {days.map(({day, date}) => (
           <DayChart
-            key={day}
+            key={date.toString()}
             day={day}
-            score={score}
+            date={date}
             isSelected={selectedDay === day}
             onPress={handleDayPress}
+            sleepData={sleepData}
           />
         ))}
       </View>

@@ -2,7 +2,7 @@ import React from 'react';
 import {ProgressChart} from 'react-native-chart-kit';
 import {StyleSheet, Text, Dimensions, TouchableOpacity} from 'react-native';
 import {calculateScoreColor} from '../../utils';
-import {ProcessedSleepData} from '../../../../utils/types';
+import {DateObject, ProcessedSleepData} from '../../../../utils/types';
 import {
   SleepType,
   calculateScore,
@@ -14,7 +14,7 @@ type DayChartProps = {
   day: string;
   date: Date;
   isSelected?: boolean;
-  onPress?: (day: string) => void;
+  onPress?: (day: DateObject) => void;
   sleepData: ProcessedSleepData;
 };
 
@@ -26,32 +26,30 @@ const DayChart = ({
   sleepData,
 }: DayChartProps) => {
   const windowWidth = Dimensions.get('window').width;
-  const chartSize = windowWidth * 0.11;
+  const chartSize = (windowWidth - 40) / 7;
 
   const containerStyle = isSelected ? {opacity: 1} : {opacity: 0.5};
 
   const handlePress = () => {
     if (onPress) {
-      onPress(day);
+      onPress({day, date});
     }
   };
 
-  console.log('Day: ', day);
-
   const deepSleepForSelectedDay = day
-    ? getSleepDataForDay(day, SleepType.DEEP, sleepData)
+    ? getSleepDataForDay({day, date}, SleepType.DEEP, sleepData)
     : [];
 
   const remSleepForSelectedDay = day
-    ? getSleepDataForDay(day, SleepType.REM, sleepData)
+    ? getSleepDataForDay({day, date}, SleepType.REM, sleepData)
     : [];
 
   const coreSleepForSelectedDay = day
-    ? getSleepDataForDay(day, SleepType.CORE, sleepData)
+    ? getSleepDataForDay({day, date}, SleepType.CORE, sleepData)
     : [];
 
   const inBedForSelectedDay = day
-    ? getSleepDataForDay(day, SleepType.INBED, sleepData)
+    ? getSleepDataForDay({day, date}, SleepType.INBED, sleepData)
     : [];
 
   const totalDeepTime = calculateTotalTime(deepSleepForSelectedDay);

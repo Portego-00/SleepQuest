@@ -6,3 +6,8 @@ export interface SleepInterval {
 export interface ProcessedSleepData {
   [stage: string]: SleepInterval[];
 }
+
+export interface DateObject {
+  day: string;
+  date: Date;
+}

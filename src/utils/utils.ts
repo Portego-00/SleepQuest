@@ -1,5 +1,5 @@
 import {HealthValue} from 'react-native-health';
-import {ProcessedSleepData, SleepInterval} from './types';
+import {DateObject, ProcessedSleepData, SleepInterval} from './types';
 
 export const mergeIntervals = (intervals: SleepInterval[]): SleepInterval[] => {
   if (intervals.length === 0) {
@@ -57,28 +57,12 @@ export enum SleepType {
   DEEP = 'DEEP',
 }
 
-const days = [
-  {day: 'Mon', score: 0.82},
-  {day: 'Tue', score: 0.634},
-  {day: 'Wed', score: 0.744},
-  {day: 'Thu', score: 0.912},
-  {day: 'Fri', score: 0.589},
-  {day: 'Sat', score: 0.425},
-  {day: 'Sun', score: 0.656},
-];
-
 export const getSleepDataForDay = (
-  day: string,
+  dateObject: DateObject,
   type: SleepType,
   processedSleepData: ProcessedSleepData,
 ): SleepInterval[] => {
-  const dayIndex = days.findIndex(d => d.day === day);
-  if (dayIndex === -1) return [];
-
-  const startOfDay = new Date();
-  startOfDay.setDate(
-    startOfDay.getDate() - (((startOfDay.getDay() + 6) % 7) - dayIndex),
-  );
+  const startOfDay = new Date(dateObject.date);
   startOfDay.setHours(17, 0, 0, 0);
 
   const endOfDay = new Date(startOfDay);
@@ -126,7 +110,13 @@ export const calculateScore = (
   let score = 0;
 
   // Sleep efficiency score (50% is 0 points and 100% is 1 point)
-  score += 2 * (sleepEfficiency - 0.5) * SLEEP_EFFICIENCY_SCORE_VALUE;
+  let sleepEfficiencyScore = 0;
+  if (sleepEfficiency < 0.5) {
+    sleepEfficiencyScore = 0;
+  } else if (sleepEfficiency >= 0.5 && sleepEfficiency < 1) {
+    sleepEfficiencyScore = (sleepEfficiency - 0.5) / 0.5;
+  }
+  score += sleepEfficiencyScore * SLEEP_EFFICIENCY_SCORE_VALUE;
 
   // Sleep time score (4 hours is 0 points and 8 hours, or anything above is 1 point)
   let sleepTimeScore = 0;
@@ -171,14 +161,14 @@ export const calculateScore = (
   return score;
 };
 
-export const generateDateRange = (days: number) => {
+export const generateDateRange = (days: number, startDate: Date) => {
   const dates = [];
   for (let i = days - 1; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
+    const date = new Date(startDate);
+    date.setDate(date.getDate() - i - 1);
     dates.push({
       day: date.toLocaleString('en-us', {weekday: 'short'}),
-      date: date,
+      date,
     });
   }
   return dates;

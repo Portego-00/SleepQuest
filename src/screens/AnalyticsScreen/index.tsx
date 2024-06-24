@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {View, StyleSheet, ScrollView} from 'react-native';
 import Background from '../../components/Background';
 import WeekDays from './components/WeekDays/WeekDays';
 import ScoreSection from './components/ScoreSection/ScoreSection';
-import {ProcessedSleepData} from '../../utils/types';
+import {DateObject, ProcessedSleepData} from '../../utils/types';
 import {
   SleepType,
   generateDateRange,
@@ -15,25 +15,15 @@ type AnalyticsScreenProps = {
 };
 
 const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
-  const [selectedDay, setSelectedDay] = useState<string | null>(
-    new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toLocaleString(
+  const [selectedDay, setSelectedDay] = useState<DateObject>({
+    day: new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toLocaleString(
       'en-us',
       {weekday: 'short'},
     ),
-  );
+    date: new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
+  });
 
-  console.log(
-    'Start day: ',
-    new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toLocaleDateString(
-      'en-us',
-    ),
-  );
-
-  const [dateRange, setDateRange] = useState(generateDateRange(7));
-
-  useEffect(() => {
-    setDateRange(generateDateRange(7));
-  }, []);
+  const [dateRange, setDateRange] = useState(generateDateRange(30, new Date()));
 
   const deepSleepForSelectedDay = selectedDay
     ? getSleepDataForDay(selectedDay, SleepType.DEEP, processedSleepData)
@@ -51,7 +41,7 @@ const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
     ? getSleepDataForDay(selectedDay, SleepType.INBED, processedSleepData)
     : [];
 
-  const handleDayChange = (day: string) => {
+  const handleDayChange = (day: DateObject) => {
     setSelectedDay(day);
   };
 

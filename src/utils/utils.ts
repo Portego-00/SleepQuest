@@ -170,3 +170,16 @@ export const calculateScore = (
 
   return score;
 };
+
+export const generateDateRange = (days: number) => {
+  const dates = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    dates.push({
+      day: date.toLocaleString('en-us', {weekday: 'short'}),
+      date: date,
+    });
+  }
+  return dates;
+};

@@ -4,17 +4,11 @@ import Background from '../../components/Background';
 import WeekDays from './components/WeekDays/WeekDays';
 import ScoreSection from './components/ScoreSection/ScoreSection';
 import {ProcessedSleepData} from '../../utils/types';
-import {SleepType, getSleepDataForDay} from '../../utils/utils';
-
-const generateDateRange = (days: number) => {
-  const dates = [];
-  for (let i = days - 1; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    dates.push({day: date.toLocaleString('en-us', {weekday: 'short'}), date});
-  }
-  return dates;
-};
+import {
+  SleepType,
+  generateDateRange,
+  getSleepDataForDay,
+} from '../../utils/utils';
 
 type AnalyticsScreenProps = {
   processedSleepData: ProcessedSleepData;
@@ -25,6 +19,13 @@ const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
     new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toLocaleString(
       'en-us',
       {weekday: 'short'},
+    ),
+  );
+
+  console.log(
+    'Start day: ',
+    new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toLocaleDateString(
+      'en-us',
     ),
   );
 

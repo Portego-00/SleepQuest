@@ -18,7 +18,7 @@ const Card = ({children, onPress}: CardProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#2b314f',
+    backgroundColor: '#252A40',
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,

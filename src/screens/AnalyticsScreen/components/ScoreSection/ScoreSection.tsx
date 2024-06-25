@@ -7,29 +7,15 @@ import Header from '../../../../components/Header';
 import {SleepInterval} from '../../../../utils/types';
 import {calculateScore, calculateTotalTime} from '../../../../utils/utils';
 
-const days = [
-  {day: 'Mon', score: 0.82},
-  {day: 'Tue', score: 0.634},
-  {day: 'Wed', score: 0.744},
-  {day: 'Thu', score: 0.912},
-  {day: 'Fri', score: 0.589},
-  {day: 'Sat', score: 0.425},
-  {day: 'Sun', score: 0.656},
-];
-
-type CardSectionProps = {
+type ScoreSectionProps = {
   deepSleepData: SleepInterval[];
   remSleepData: SleepInterval[];
   coreSleepData: SleepInterval[];
   inBedData: SleepInterval[];
 };
 
-const CardSection = (props: CardSectionProps) => {
-  const currentDate = new Date();
-  const currentDay = currentDate.toLocaleDateString('en-US', {
-    weekday: 'short',
-  });
-  const initialScore = days.find(day => day.day === currentDay)?.score || 0;
+const ScoreSection = (props: ScoreSectionProps) => {
+  const initialScore = 0;
 
   const [dayScore, setDayScore] = useState(initialScore);
   const [currentAnimatedValue, setCurrentAnimatedValue] =
@@ -168,4 +154,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CardSection;
+export default ScoreSection;

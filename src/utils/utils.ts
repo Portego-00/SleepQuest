@@ -173,3 +173,84 @@ export const generateDateRange = (days: number, startDate: Date) => {
   }
   return dates;
 };
+
+export const generateCurrentWeekDays = (currentDay: Date): DateObject[] => {
+  const addDays = (date: Date, days: number): Date => {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  };
+
+  const dayOfWeek = currentDay.getDay();
+  const startOfWeek = new Date(currentDay);
+  const distanceToMonday = (dayOfWeek + 6) % 7;
+  startOfWeek.setDate(currentDay.getDate() - distanceToMonday);
+
+  const weekDays: DateObject[] = [];
+  for (let i = 0; i < 7; i++) {
+    weekDays.push({
+      day: addDays(startOfWeek, i).toLocaleString('en-us', {weekday: 'short'}),
+      date: addDays(startOfWeek, i),
+    });
+  }
+
+  return weekDays;
+};
+
+export const calculateScoreForTimeRange = (
+  dateRange: DateObject[],
+  processedSleepData: ProcessedSleepData,
+): number[] => {
+  return dateRange.map(date => {
+    const deepSleepData = getSleepDataForDay(
+      date,
+      SleepType.DEEP,
+      processedSleepData,
+    );
+    const remSleepData = getSleepDataForDay(
+      date,
+      SleepType.REM,
+      processedSleepData,
+    );
+    const coreSleepData = getSleepDataForDay(
+      date,
+      SleepType.CORE,
+      processedSleepData,
+    );
+    const inBedData = getSleepDataForDay(
+      date,
+      SleepType.INBED,
+      processedSleepData,
+    );
+
+    const deepSleepTime = calculateTotalTime(deepSleepData);
+    const remSleepTime = calculateTotalTime(remSleepData);
+    const coreSleepTime = calculateTotalTime(coreSleepData);
+    const inBedTime = calculateTotalTime(inBedData);
+
+    return calculateScore(
+      deepSleepTime,
+      remSleepTime,
+      coreSleepTime,
+      inBedTime,
+    );
+  });
+};
+
+export const calculateDaysCompleted = (currentDay: Date) => {
+  const dayOfWeek = currentDay.getDay();
+  const adjustedDayOfWeek = (dayOfWeek + 6) % 7;
+
+  return adjustedDayOfWeek;
+};
+
+export const generateRandomNamesAndScores = () => {
+  const currentDay = new Date(new Date().getTime());
+  const daysCompleted = calculateDaysCompleted(currentDay);
+  const randomNames = Array.from({length: 20}, (_, i) => `User ${i + 1}`);
+  const randomScores = randomNames.map(
+    () => Math.floor(Math.random() * 1000) * daysCompleted,
+  );
+
+  return {randomNames, randomScores};
+};

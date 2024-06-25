@@ -11,6 +11,7 @@ import {ProcessedSleepData} from './src/utils/types';
 import {getProcessedSleepData} from './src/utils/utils';
 import HomeScreen from './src/screens/HomeScreen';
 import Background from './src/components/Background';
+import LeaderboardScreen from './src/screens/LeaderboardScreen';
 
 const permissions = {
   permissions: {
@@ -39,6 +40,12 @@ const AnalyticsTabScreen = ({
 }: {
   processedSleepData: ProcessedSleepData;
 }) => <AnalyticsScreen processedSleepData={processedSleepData} />;
+
+const LeaderboardTabScreen = ({
+  processedSleepData,
+}: {
+  processedSleepData: ProcessedSleepData;
+}) => <LeaderboardScreen processedSleepData={processedSleepData} />;
 
 const Tab = createBottomTabNavigator();
 
@@ -106,6 +113,8 @@ function App(): React.JSX.Element {
                 iconName = focused ? 'analytics' : 'analytics-outline';
               } else if (route.name === 'Profile') {
                 iconName = focused ? 'person' : 'person-outline';
+              } else if (route.name === 'Leaderboard') {
+                iconName = focused ? 'trophy' : 'trophy-outline';
               }
               return (
                 <Ionicons name={iconName || ''} size={size} color={color} />
@@ -118,6 +127,14 @@ function App(): React.JSX.Element {
           <Tab.Screen name="Analytics">
             {props => (
               <AnalyticsTabScreen
+                {...props}
+                processedSleepData={processedSleepData}
+              />
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="Leaderboard">
+            {props => (
+              <LeaderboardTabScreen
                 {...props}
                 processedSleepData={processedSleepData}
               />

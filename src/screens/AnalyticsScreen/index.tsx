@@ -23,7 +23,7 @@ const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
     date: new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
   });
 
-  const [dateRange, setDateRange] = useState(generateDateRange(30, new Date()));
+  const dateRange = generateDateRange(30, new Date());
 
   const deepSleepForSelectedDay = selectedDay
     ? getSleepDataForDay(selectedDay, SleepType.DEEP, processedSleepData)

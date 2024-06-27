@@ -14,8 +14,10 @@ const ScoreSlate = ({
   position,
   profilePicture,
 }: ScoreSlateProps) => {
+  const backgroundColor = username === 'You' ? '#32364B' : '#1E2237';
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {backgroundColor}]}>
       <View style={styles.positionContainer}>
         <Text style={styles.positionText}>{position}</Text>
       </View>

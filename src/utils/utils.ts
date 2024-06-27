@@ -95,6 +95,7 @@ const SLEEP_EFFICIENCY_SCORE_VALUE = 0.2; // 30%
 const SLEEP_TIME_SCORE_VALUE = 0.4; // 40%
 const DEEP_SLEEP_SCORE_VALUE = 0.2; // 20%
 const REM_SLEEP_SCORE_VALUE = 0.1; // 10%
+const CONSISTENCY_SCORE_VALUE = 0.1; // 10%
 
 export const calculateScore = (
   processedSleepData: ProcessedSleepData,
@@ -182,7 +183,14 @@ export const calculateScore = (
 
   score += remSleepScore * REM_SLEEP_SCORE_VALUE;
 
-  return score;
+  // Consistency score
+  const consistencyScore = calculateBedtimeConsistency(
+    processedSleepData,
+    date,
+  );
+  score += consistencyScore * CONSISTENCY_SCORE_VALUE;
+
+  return Math.min(score, 1000);
 };
 
 export const generateDateRange = (days: number, startDate: Date) => {
@@ -246,4 +254,67 @@ export const generateRandomNamesAndScores = () => {
   );
 
   return {randomNames, randomScores};
+};
+
+export const calculateBedtimeConsistency = (
+  processedSleepData: ProcessedSleepData,
+  currentDate: DateObject,
+): number => {
+  const pastSixDays: DateObject[] = [];
+  for (let i = 1; i <= 6; i++) {
+    const date = new Date(currentDate.date);
+    date.setDate(date.getDate() - i);
+    pastSixDays.push({
+      day: date.toLocaleString('en-us', {weekday: 'short'}),
+      date,
+    });
+  }
+
+  const bedtimes: number[] = pastSixDays.map(date => {
+    const sleepData = getSleepDataForDay(
+      date,
+      SleepType.CORE,
+      processedSleepData,
+    );
+    if (sleepData.length > 0) {
+      const firstInterval = sleepData[0];
+      return new Date(firstInterval.start).getTime();
+    }
+    return 0;
+  });
+
+  if (bedtimes.length !== 6) {
+    return 0;
+  }
+
+  const currentBedtime: number[] = getSleepDataForDay(
+    currentDate,
+    SleepType.CORE,
+    processedSleepData,
+  ).map(interval => new Date(interval.start).getTime());
+
+  if (!currentBedtime.length) return 0;
+
+  bedtimes.forEach(bedtime => {
+    console.log(new Date(bedtime).toLocaleTimeString(), ' - ', bedtime);
+  });
+
+  const normalizedBedTimes = bedtimes.map(bedtime => bedtime % 86400000);
+  normalizedBedTimes.forEach(bedtime => {
+    console.log(new Date(bedtime).toLocaleTimeString(), ' - ', bedtime);
+  });
+
+  const avgBedtime =
+    normalizedBedTimes.reduce((sum, bedtime) => sum + bedtime, 0) /
+    normalizedBedTimes.length;
+
+  const currentBedtimeTime = currentBedtime[0];
+  const normalizedCurrentBedtime = currentBedtimeTime % 86400000;
+
+  const difference = Math.abs(normalizedCurrentBedtime - avgBedtime);
+
+  // Considering 1 hour (3600000 ms) difference as 0 consistency and same time as 1
+  const consistency = 1 - Math.min(difference / 3600000, 1);
+
+  return consistency;
 };

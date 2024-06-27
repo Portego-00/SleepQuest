@@ -97,11 +97,35 @@ const DEEP_SLEEP_SCORE_VALUE = 0.2; // 20%
 const REM_SLEEP_SCORE_VALUE = 0.1; // 10%
 
 export const calculateScore = (
-  deepSleepTime: number,
-  remSleepTime: number,
-  coreSleepTime: number,
-  inBedTime: number,
+  processedSleepData: ProcessedSleepData,
+  date: DateObject,
 ): number => {
+  const deepSleepData = getSleepDataForDay(
+    date,
+    SleepType.DEEP,
+    processedSleepData,
+  );
+  const remSleepData = getSleepDataForDay(
+    date,
+    SleepType.REM,
+    processedSleepData,
+  );
+  const coreSleepData = getSleepDataForDay(
+    date,
+    SleepType.CORE,
+    processedSleepData,
+  );
+  const inBedData = getSleepDataForDay(
+    date,
+    SleepType.INBED,
+    processedSleepData,
+  );
+
+  const deepSleepTime = calculateTotalTime(deepSleepData);
+  const remSleepTime = calculateTotalTime(remSleepData);
+  const coreSleepTime = calculateTotalTime(coreSleepData);
+  const inBedTime = calculateTotalTime(inBedData);
+
   if (inBedTime === 0) return 0;
 
   const totalSleepTime = deepSleepTime + remSleepTime + coreSleepTime;
@@ -202,38 +226,7 @@ export const calculateScoreForTimeRange = (
   processedSleepData: ProcessedSleepData,
 ): number[] => {
   return dateRange.map(date => {
-    const deepSleepData = getSleepDataForDay(
-      date,
-      SleepType.DEEP,
-      processedSleepData,
-    );
-    const remSleepData = getSleepDataForDay(
-      date,
-      SleepType.REM,
-      processedSleepData,
-    );
-    const coreSleepData = getSleepDataForDay(
-      date,
-      SleepType.CORE,
-      processedSleepData,
-    );
-    const inBedData = getSleepDataForDay(
-      date,
-      SleepType.INBED,
-      processedSleepData,
-    );
-
-    const deepSleepTime = calculateTotalTime(deepSleepData);
-    const remSleepTime = calculateTotalTime(remSleepData);
-    const coreSleepTime = calculateTotalTime(coreSleepData);
-    const inBedTime = calculateTotalTime(inBedData);
-
-    return calculateScore(
-      deepSleepTime,
-      remSleepTime,
-      coreSleepTime,
-      inBedTime,
-    );
+    return calculateScore(processedSleepData, date);
   });
 };
 

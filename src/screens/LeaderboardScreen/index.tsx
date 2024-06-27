@@ -25,9 +25,7 @@ const LeaderboardScreen = ({processedSleepData}: LeaderboardScreenProps) => {
     0,
   );
 
-  const {randomNames, randomScores} =
-    generateRandomNamesAndScores();
-
+  const {randomNames, randomScores} = generateRandomNamesAndScores();
 
   const sortedScores = randomNames
     .map((name, index) => ({

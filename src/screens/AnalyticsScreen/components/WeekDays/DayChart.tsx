@@ -3,12 +3,7 @@ import {ProgressChart} from 'react-native-chart-kit';
 import {StyleSheet, Text, Dimensions, TouchableOpacity} from 'react-native';
 import {calculateScoreColor} from '../../utils';
 import {DateObject, ProcessedSleepData} from '../../../../utils/types';
-import {
-  SleepType,
-  calculateScore,
-  calculateTotalTime,
-  getSleepDataForDay,
-} from '../../../../utils/utils';
+import {calculateScore} from '../../../../utils/utils';
 
 type DayChartProps = {
   day: string;
@@ -36,33 +31,7 @@ const DayChart = ({
     }
   };
 
-  const deepSleepForSelectedDay = day
-    ? getSleepDataForDay({day, date}, SleepType.DEEP, sleepData)
-    : [];
-
-  const remSleepForSelectedDay = day
-    ? getSleepDataForDay({day, date}, SleepType.REM, sleepData)
-    : [];
-
-  const coreSleepForSelectedDay = day
-    ? getSleepDataForDay({day, date}, SleepType.CORE, sleepData)
-    : [];
-
-  const inBedForSelectedDay = day
-    ? getSleepDataForDay({day, date}, SleepType.INBED, sleepData)
-    : [];
-
-  const totalDeepTime = calculateTotalTime(deepSleepForSelectedDay);
-  const totalRemTime = calculateTotalTime(remSleepForSelectedDay);
-  const totalCoreTime = calculateTotalTime(coreSleepForSelectedDay);
-  const totalInBedTime = calculateTotalTime(inBedForSelectedDay);
-
-  const newScore = calculateScore(
-    totalDeepTime,
-    totalRemTime,
-    totalCoreTime,
-    totalInBedTime,
-  );
+  const newScore = calculateScore(sleepData, {day, date});
 
   return (
     <TouchableOpacity

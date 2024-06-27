@@ -4,14 +4,17 @@ import Card from '../../../../components/Card';
 import {ProgressChart} from 'react-native-chart-kit';
 import {calculateScoreColor} from '../../utils';
 import Header from '../../../../components/Header';
-import {SleepInterval} from '../../../../utils/types';
-import {calculateScore, calculateTotalTime} from '../../../../utils/utils';
+import {DateObject, ProcessedSleepData} from '../../../../utils/types';
+import {
+  SleepType,
+  calculateScore,
+  calculateTotalTime,
+  getSleepDataForDay,
+} from '../../../../utils/utils';
 
 type ScoreSectionProps = {
-  deepSleepData: SleepInterval[];
-  remSleepData: SleepInterval[];
-  coreSleepData: SleepInterval[];
-  inBedData: SleepInterval[];
+  day: DateObject;
+  processedSleepData: ProcessedSleepData;
 };
 
 const ScoreSection = (props: ScoreSectionProps) => {
@@ -32,21 +35,32 @@ const ScoreSection = (props: ScoreSectionProps) => {
     };
   }, [animatedScore]);
 
-  const totalDeepTime = calculateTotalTime(props.deepSleepData);
-  const totalRemTime = calculateTotalTime(props.remSleepData);
-  const totalCoreTime = calculateTotalTime(props.coreSleepData);
-  const totalInBedTime = calculateTotalTime(props.inBedData);
+  const deepSleepForSelectedDay = props.day
+    ? getSleepDataForDay(props.day, SleepType.DEEP, props.processedSleepData)
+    : [];
+
+  const remSleepForSelectedDay = props.day
+    ? getSleepDataForDay(props.day, SleepType.REM, props.processedSleepData)
+    : [];
+
+  const coreSleepForSelectedDay = props.day
+    ? getSleepDataForDay(props.day, SleepType.CORE, props.processedSleepData)
+    : [];
+
+  const inBedForSelectedDay = props.day
+    ? getSleepDataForDay(props.day, SleepType.INBED, props.processedSleepData)
+    : [];
+
+  const totalDeepTime = calculateTotalTime(deepSleepForSelectedDay);
+  const totalRemTime = calculateTotalTime(remSleepForSelectedDay);
+  const totalCoreTime = calculateTotalTime(coreSleepForSelectedDay);
+  const totalInBedTime = calculateTotalTime(inBedForSelectedDay);
   const totalSleepTime = totalDeepTime + totalRemTime + totalCoreTime;
 
   useEffect(() => {
-    const newScore = calculateScore(
-      totalDeepTime,
-      totalRemTime,
-      totalCoreTime,
-      totalInBedTime,
-    );
+    const newScore = calculateScore(props.processedSleepData, props.day);
     setDayScore(newScore);
-  }, [totalDeepTime, totalRemTime, totalCoreTime, totalInBedTime]);
+  }, [props.processedSleepData, props.day]);
 
   useEffect(() => {
     Animated.timing(animatedScore, {

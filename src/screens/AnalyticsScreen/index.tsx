@@ -4,11 +4,7 @@ import Background from '../../components/Background';
 import WeekDays from './components/WeekDays/WeekDays';
 import ScoreSection from './components/ScoreSection/ScoreSection';
 import {DateObject, ProcessedSleepData} from '../../utils/types';
-import {
-  SleepType,
-  generateDateRange,
-  getSleepDataForDay,
-} from '../../utils/utils';
+import {generateDateRange} from '../../utils/utils';
 
 type AnalyticsScreenProps = {
   processedSleepData: ProcessedSleepData;
@@ -24,22 +20,6 @@ const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
   });
 
   const dateRange = generateDateRange(30, new Date());
-
-  const deepSleepForSelectedDay = selectedDay
-    ? getSleepDataForDay(selectedDay, SleepType.DEEP, processedSleepData)
-    : [];
-
-  const remSleepForSelectedDay = selectedDay
-    ? getSleepDataForDay(selectedDay, SleepType.REM, processedSleepData)
-    : [];
-
-  const coreSleepForSelectedDay = selectedDay
-    ? getSleepDataForDay(selectedDay, SleepType.CORE, processedSleepData)
-    : [];
-
-  const inBedForSelectedDay = selectedDay
-    ? getSleepDataForDay(selectedDay, SleepType.INBED, processedSleepData)
-    : [];
 
   const handleDayChange = (day: DateObject) => {
     setSelectedDay(day);
@@ -57,10 +37,8 @@ const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
           style={styles.pageScrollView}
           showsVerticalScrollIndicator={false}>
           <ScoreSection
-            deepSleepData={deepSleepForSelectedDay}
-            remSleepData={remSleepForSelectedDay}
-            coreSleepData={coreSleepForSelectedDay}
-            inBedData={inBedForSelectedDay}
+            day={selectedDay}
+            processedSleepData={processedSleepData}
           />
           <View style={styles.bottomSpacer} />
         </ScrollView>

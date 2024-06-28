@@ -91,6 +91,34 @@ export const calculateTotalTime = (sleepData: SleepInterval[]) => {
   return totalTime;
 };
 
+export const getAllSleepDataForDay = (
+  dateObject: DateObject,
+  processedSleepData: ProcessedSleepData,
+) => {
+  const deepSleepData = getSleepDataForDay(
+    dateObject,
+    SleepType.DEEP,
+    processedSleepData,
+  );
+  const remSleepData = getSleepDataForDay(
+    dateObject,
+    SleepType.REM,
+    processedSleepData,
+  );
+  const coreSleepData = getSleepDataForDay(
+    dateObject,
+    SleepType.CORE,
+    processedSleepData,
+  );
+  const inBedData = getSleepDataForDay(
+    dateObject,
+    SleepType.INBED,
+    processedSleepData,
+  );
+
+  return {deepSleepData, remSleepData, coreSleepData, inBedData};
+};
+
 const SLEEP_EFFICIENCY_SCORE_VALUE = 0.2; // 30%
 const SLEEP_TIME_SCORE_VALUE = 0.4; // 40%
 const DEEP_SLEEP_SCORE_VALUE = 0.2; // 20%
@@ -101,39 +129,9 @@ export const calculateScore = (
   processedSleepData: ProcessedSleepData,
   date: DateObject,
 ): number => {
-  const deepSleepData = getSleepDataForDay(
-    date,
-    SleepType.DEEP,
-    processedSleepData,
-  );
-  const remSleepData = getSleepDataForDay(
-    date,
-    SleepType.REM,
-    processedSleepData,
-  );
-  const coreSleepData = getSleepDataForDay(
-    date,
-    SleepType.CORE,
-    processedSleepData,
-  );
-  const inBedData = getSleepDataForDay(
-    date,
-    SleepType.INBED,
-    processedSleepData,
-  );
-
-  const deepSleepTime = calculateTotalTime(deepSleepData);
-  const remSleepTime = calculateTotalTime(remSleepData);
-  const coreSleepTime = calculateTotalTime(coreSleepData);
-  const inBedTime = calculateTotalTime(inBedData);
-
-  if (inBedTime === 0) return 0;
-
-  const totalSleepTime = deepSleepTime + remSleepTime + coreSleepTime;
-  const sleepEfficiency = totalSleepTime / inBedTime;
-
   let score = 0;
 
+  const sleepEfficiency = calculateSleepEfficiency(processedSleepData, date);
   // Sleep efficiency score (50% is 0 points and 100% is 1 point)
   let sleepEfficiencyScore = 0;
   if (sleepEfficiency < 0.5) {
@@ -142,6 +140,10 @@ export const calculateScore = (
     sleepEfficiencyScore = (sleepEfficiency - 0.5) / 0.5;
   }
   score += sleepEfficiencyScore * SLEEP_EFFICIENCY_SCORE_VALUE;
+
+  const totalSleepTime = calculateTotalSleepTime(processedSleepData, date);
+
+  if (totalSleepTime === 0) return 0;
 
   // Sleep time score (4 hours is 0 points and 8 hours, or anything above is 1 point)
   let sleepTimeScore = 0;
@@ -155,6 +157,7 @@ export const calculateScore = (
 
   score += sleepTimeScore * SLEEP_TIME_SCORE_VALUE;
 
+  const deepSleepTime = calculateDeepSleepTime(processedSleepData, date);
   // Deep sleep score (30 minutes is 0 points and 90 minutes, or anything above is 1 point)
   let deepSleepScore = 0;
   if (deepSleepTime < 0.25 * 3600000) {
@@ -170,6 +173,7 @@ export const calculateScore = (
 
   score += deepSleepScore * DEEP_SLEEP_SCORE_VALUE;
 
+  const remSleepTime = calculateRemSleepTime(processedSleepData, date);
   // REM sleep score (45 minutes is 0 points and 105 minutes, or anything above is 1 point)
   let remSleepScore = 0;
 
@@ -256,6 +260,63 @@ export const generateRandomNamesAndScores = () => {
   return {randomNames, randomScores};
 };
 
+export const calculateSleepEfficiency = (
+  processedSleepData: ProcessedSleepData,
+  currentDate: DateObject,
+): number => {
+  const {deepSleepData, remSleepData, coreSleepData, inBedData} =
+    getAllSleepDataForDay(currentDate, processedSleepData);
+
+  const deepSleepTime = calculateTotalTime(deepSleepData);
+  const remSleepTime = calculateTotalTime(remSleepData);
+  const coreSleepTime = calculateTotalTime(coreSleepData);
+  const inBedTime = calculateTotalTime(inBedData);
+
+  if (inBedTime === 0) return 0;
+
+  const totalSleepTime = deepSleepTime + remSleepTime + coreSleepTime;
+  const sleepEfficiency = totalSleepTime / inBedTime;
+
+  return sleepEfficiency;
+};
+
+const calculateTotalSleepTime = (
+  processedSleepData: ProcessedSleepData,
+  currentDate: DateObject,
+): number => {
+  const {deepSleepData, remSleepData, coreSleepData} = getAllSleepDataForDay(
+    currentDate,
+    processedSleepData,
+  );
+
+  const deepSleepTime = calculateTotalTime(deepSleepData);
+  const remSleepTime = calculateTotalTime(remSleepData);
+  const coreSleepTime = calculateTotalTime(coreSleepData);
+
+  return deepSleepTime + remSleepTime + coreSleepTime;
+};
+
+const calculateDeepSleepTime = (
+  processedSleepData: ProcessedSleepData,
+  currentDate: DateObject,
+): number => {
+  const {deepSleepData} = getAllSleepDataForDay(
+    currentDate,
+    processedSleepData,
+  );
+
+  return calculateTotalTime(deepSleepData);
+};
+
+const calculateRemSleepTime = (
+  processedSleepData: ProcessedSleepData,
+  currentDate: DateObject,
+): number => {
+  const {remSleepData} = getAllSleepDataForDay(currentDate, processedSleepData);
+
+  return calculateTotalTime(remSleepData);
+};
+
 export const calculateBedtimeConsistency = (
   processedSleepData: ProcessedSleepData,
   currentDate: DateObject,
@@ -295,14 +356,7 @@ export const calculateBedtimeConsistency = (
 
   if (!currentBedtime.length) return 0;
 
-  bedtimes.forEach(bedtime => {
-    console.log(new Date(bedtime).toLocaleTimeString(), ' - ', bedtime);
-  });
-
   const normalizedBedTimes = bedtimes.map(bedtime => bedtime % 86400000);
-  normalizedBedTimes.forEach(bedtime => {
-    console.log(new Date(bedtime).toLocaleTimeString(), ' - ', bedtime);
-  });
 
   const avgBedtime =
     normalizedBedTimes.reduce((sum, bedtime) => sum + bedtime, 0) /

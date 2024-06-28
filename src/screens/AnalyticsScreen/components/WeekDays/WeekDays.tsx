@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState, useCallback} from 'react';
 import {View, StyleSheet, ScrollView} from 'react-native';
 import DayChart from './DayChart';
 import {DateObject, ProcessedSleepData} from '../../../../utils/types';
@@ -19,10 +19,13 @@ const WeekDays = ({days, onChangeDay, sleepData}: WeekDaysProps) => {
   });
   const scrollViewRef = useRef<ScrollView>(null);
 
-  const handleDayPress = (day: DateObject) => {
-    setSelectedDay(day);
-    onChangeDay(day);
-  };
+  const handleDayPress = useCallback(
+    (day: DateObject) => {
+      setSelectedDay(day);
+      onChangeDay(day);
+    },
+    [onChangeDay],
+  );
 
   useEffect(() => {
     if (scrollViewRef.current) {
@@ -73,4 +76,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WeekDays;
+export default React.memo(WeekDays);

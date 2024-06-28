@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState, useCallback, useMemo} from 'react';
 import {View, Text, StyleSheet, Animated} from 'react-native';
 import Card from '../../../../components/Card';
 import {ProgressChart} from 'react-native-chart-kit';
@@ -17,7 +17,7 @@ type ScoreSectionProps = {
   processedSleepData: ProcessedSleepData;
 };
 
-const ScoreSection = (props: ScoreSectionProps) => {
+const ScoreSection = ({day, processedSleepData}: ScoreSectionProps) => {
   const initialScore = 0;
 
   const [dayScore, setDayScore] = useState(initialScore);
@@ -25,7 +25,7 @@ const ScoreSection = (props: ScoreSectionProps) => {
     useState(initialScore);
   const animatedScore = useRef(new Animated.Value(initialScore)).current;
 
-  useEffect(() => {
+  const handleScoreChange = useCallback(() => {
     const id = animatedScore.addListener(({value}) => {
       setCurrentAnimatedValue(value);
     });
@@ -35,32 +35,56 @@ const ScoreSection = (props: ScoreSectionProps) => {
     };
   }, [animatedScore]);
 
-  const deepSleepForSelectedDay = props.day
-    ? getSleepDataForDay(props.day, SleepType.DEEP, props.processedSleepData)
-    : [];
+  useEffect(() => {
+    handleScoreChange();
+  }, [handleScoreChange]);
 
-  const remSleepForSelectedDay = props.day
-    ? getSleepDataForDay(props.day, SleepType.REM, props.processedSleepData)
-    : [];
+  const deepSleepForSelectedDay = useMemo(
+    () =>
+      day ? getSleepDataForDay(day, SleepType.DEEP, processedSleepData) : [],
+    [day, processedSleepData],
+  );
 
-  const coreSleepForSelectedDay = props.day
-    ? getSleepDataForDay(props.day, SleepType.CORE, props.processedSleepData)
-    : [];
+  const remSleepForSelectedDay = useMemo(
+    () =>
+      day ? getSleepDataForDay(day, SleepType.REM, processedSleepData) : [],
+    [day, processedSleepData],
+  );
 
-  const inBedForSelectedDay = props.day
-    ? getSleepDataForDay(props.day, SleepType.INBED, props.processedSleepData)
-    : [];
+  const coreSleepForSelectedDay = useMemo(
+    () =>
+      day ? getSleepDataForDay(day, SleepType.CORE, processedSleepData) : [],
+    [day, processedSleepData],
+  );
 
-  const totalDeepTime = calculateTotalTime(deepSleepForSelectedDay);
-  const totalRemTime = calculateTotalTime(remSleepForSelectedDay);
-  const totalCoreTime = calculateTotalTime(coreSleepForSelectedDay);
-  const totalInBedTime = calculateTotalTime(inBedForSelectedDay);
+  const inBedForSelectedDay = useMemo(
+    () =>
+      day ? getSleepDataForDay(day, SleepType.INBED, processedSleepData) : [],
+    [day, processedSleepData],
+  );
+
+  const totalDeepTime = useMemo(
+    () => calculateTotalTime(deepSleepForSelectedDay),
+    [deepSleepForSelectedDay],
+  );
+  const totalRemTime = useMemo(
+    () => calculateTotalTime(remSleepForSelectedDay),
+    [remSleepForSelectedDay],
+  );
+  const totalCoreTime = useMemo(
+    () => calculateTotalTime(coreSleepForSelectedDay),
+    [coreSleepForSelectedDay],
+  );
+  const totalInBedTime = useMemo(
+    () => calculateTotalTime(inBedForSelectedDay),
+    [inBedForSelectedDay],
+  );
   const totalSleepTime = totalDeepTime + totalRemTime + totalCoreTime;
 
   useEffect(() => {
-    const newScore = calculateScore(props.processedSleepData, props.day);
+    const newScore = calculateScore(processedSleepData, day);
     setDayScore(newScore);
-  }, [props.processedSleepData, props.day]);
+  }, [processedSleepData, day]);
 
   useEffect(() => {
     Animated.timing(animatedScore, {
@@ -168,4 +192,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ScoreSection;
+export default React.memo(ScoreSection);

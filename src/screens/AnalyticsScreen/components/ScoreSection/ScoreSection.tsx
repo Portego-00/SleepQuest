@@ -63,6 +63,12 @@ const ScoreSection = ({day, processedSleepData}: ScoreSectionProps) => {
     [day, processedSleepData],
   );
 
+  const awakeForSelectedDay = useMemo(
+    () =>
+      day ? getSleepDataForDay(day, SleepType.AWAKE, processedSleepData) : [],
+    [day, processedSleepData],
+  );
+
   const totalDeepTime = useMemo(
     () => calculateTotalTime(deepSleepForSelectedDay),
     [deepSleepForSelectedDay],
@@ -79,6 +85,11 @@ const ScoreSection = ({day, processedSleepData}: ScoreSectionProps) => {
     () => calculateTotalTime(inBedForSelectedDay),
     [inBedForSelectedDay],
   );
+  const totalAwakeTime = useMemo(
+    () => calculateTotalTime(awakeForSelectedDay),
+    [awakeForSelectedDay],
+  );
+
   const totalSleepTime = totalDeepTime + totalRemTime + totalCoreTime;
 
   useEffect(() => {
@@ -140,8 +151,10 @@ const ScoreSection = ({day, processedSleepData}: ScoreSectionProps) => {
             </Text>
             <Text style={styles.scoreInfoTitle}>Time in Bed</Text>
             <Text style={styles.timeText}>
-              {`${Math.floor(totalInBedTime / 3600000)} hours ${Math.floor(
-                (totalInBedTime % 3600000) / 60000,
+              {`${Math.floor(
+                (totalInBedTime + totalAwakeTime) / 3600000,
+              )} hours ${Math.floor(
+                ((totalInBedTime + totalAwakeTime) % 3600000) / 60000,
               )} minutes`}
             </Text>
           </View>

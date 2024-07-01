@@ -4,6 +4,7 @@ import Card from '../../../../components/Card';
 import Header from '../../../../components/Header';
 import {DateObject, ProcessedSleepData} from '../../../../utils/types';
 import {LineChart} from 'react-native-chart-kit';
+import {generateLabels} from './utils';
 
 type SleepGraphSectionProps = {
   day: DateObject;
@@ -14,13 +15,27 @@ const SleepGraphSection = ({
   day,
   processedSleepData,
 }: SleepGraphSectionProps) => {
+  const labels = generateLabels(processedSleepData, day);
+  console.log(labels);
   const data = {
-    labels: ['11', '12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+    labels: labels,
     datasets: [
       {
-        data: [3, 2.5, 1.5, 1.5, 2, 2, 2, 1.5, 3, 2, 2.5, 3],
+        data: [
+          3, 2, 0, 0, 1, 1, 1, 0, 3, 2, 2, 3, 3, 2, 0, 0, 1, 1, 1, 0, 3, 2, 2,
+          3, 3, 2, 0, 0, 1, 1, 1, 0, 3, 2, 2, 3, 3, 2, 0, 0, 1, 1, 1, 0, 3, 2,
+          2, 3,
+        ],
         color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
         strokeWidth: 2,
+      },
+      {
+        data: [0],
+        withDots: false,
+      },
+      {
+        data: [4],
+        withDots: false,
       },
     ],
   };
@@ -35,9 +50,7 @@ const SleepGraphSection = ({
       borderRadius: 16,
     },
     propsForDots: {
-      r: '6',
-      strokeWidth: '2',
-      stroke: '#ffa726',
+      r: '0',
     },
   };
 
@@ -53,26 +66,32 @@ const SleepGraphSection = ({
           height={220}
           chartConfig={chartConfig}
           bezier
-          // Format y-axis labels. If value is 1, then show Deep, if value is 2, then show Light, if value is 3, then show REM
+          withInnerLines={false}
+          withVerticalLines={false}
+          withHorizontalLines={false}
           formatYLabel={value => {
-            console.log(value);
-            if (value === '1.50') {
+            if (value === '0.00') {
               return 'Deep';
-            } else if (value === '2.00') {
+            } else if (value === '1.00') {
               return 'REM';
-            } else if (value === '2.50') {
+            } else if (value === '2.00') {
               return 'Light';
             } else if (value === '3.00') {
               return 'Awake';
             }
             return '';
           }}
+          style={styles.chartStyle}
         />
       </Card>
     </>
   );
 };
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  chartStyle: {
+    marginTop: -30,
+  },
+});
 
 export default React.memo(SleepGraphSection);

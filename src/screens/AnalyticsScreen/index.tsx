@@ -5,6 +5,7 @@ import WeekDays from './components/WeekDays/WeekDays';
 import ScoreSection from './components/ScoreSection/ScoreSection';
 import {DateObject, ProcessedSleepData} from '../../utils/types';
 import {generateDateRange} from '../../utils/utils';
+import SleepGraphSection from './components/SleepGraphSection/SleepGraphSection';
 
 type AnalyticsScreenProps = {
   processedSleepData: ProcessedSleepData;
@@ -37,6 +38,10 @@ const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
           style={styles.pageScrollView}
           showsVerticalScrollIndicator={false}>
           <ScoreSection
+            day={selectedDay}
+            processedSleepData={processedSleepData}
+          />
+          <SleepGraphSection
             day={selectedDay}
             processedSleepData={processedSleepData}
           />

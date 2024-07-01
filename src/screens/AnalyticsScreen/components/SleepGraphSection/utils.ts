@@ -1,5 +1,13 @@
-import {DateObject, ProcessedSleepData} from '../../../../utils/types';
-import {SleepType, getSleepDataForDay} from '../../../../utils/utils';
+import {
+  DateObject,
+  ProcessedSleepData,
+  SleepInterval,
+} from '../../../../utils/types';
+import {
+  SleepType,
+  getAllSleepDataForDay,
+  getSleepDataForDay,
+} from '../../../../utils/utils';
 
 export const generateLabels = (data: ProcessedSleepData, day: DateObject) => {
   const labels: string[] = [];
@@ -27,4 +35,96 @@ export const generateLabels = (data: ProcessedSleepData, day: DateObject) => {
   }
 
   return labels;
+};
+
+const SLEEP_TYPE_VALUES: Record<SleepType, number> = {
+  [SleepType.INBED]: 3,
+  [SleepType.AWAKE]: 3,
+  [SleepType.CORE]: 2,
+  [SleepType.REM]: 1,
+  [SleepType.DEEP]: 0,
+};
+
+const getSleepStateValue = (
+  timestamp: Date,
+  deepSleepData: SleepInterval[],
+  remSleepData: SleepInterval[],
+  coreSleepData: SleepInterval[],
+  inBedData: SleepInterval[],
+  awakeData: SleepInterval[],
+) => {
+  // Check what type of sleep the timestamp falls under
+  const isCoreSleep = coreSleepData.some(
+    interval =>
+      timestamp >= new Date(interval.start) &&
+      timestamp < new Date(interval.end),
+  );
+  if (isCoreSleep) {
+    return SLEEP_TYPE_VALUES[SleepType.CORE];
+  }
+  const isRemSleep = remSleepData.some(
+    interval =>
+      timestamp >= new Date(interval.start) &&
+      timestamp < new Date(interval.end),
+  );
+  if (isRemSleep) {
+    return SLEEP_TYPE_VALUES[SleepType.REM];
+  }
+  const isAwake = awakeData.some(
+    interval =>
+      timestamp >= new Date(interval.start) &&
+      timestamp < new Date(interval.end),
+  );
+  if (isAwake) {
+    return SLEEP_TYPE_VALUES[SleepType.AWAKE];
+  }
+  const isDeepSleep = deepSleepData.some(
+    interval =>
+      timestamp >= new Date(interval.start) &&
+      timestamp < new Date(interval.end),
+  );
+  if (isDeepSleep) {
+    return SLEEP_TYPE_VALUES[SleepType.DEEP];
+  }
+  const isInBed = inBedData.some(
+    interval =>
+      timestamp >= new Date(interval.start) &&
+      timestamp < new Date(interval.end),
+  );
+  if (isInBed) {
+    return SLEEP_TYPE_VALUES[SleepType.INBED];
+  }
+  return SLEEP_TYPE_VALUES[SleepType.INBED];
+};
+
+export const generateSleepStateData = (
+  data: ProcessedSleepData,
+  day: DateObject,
+) => {
+  const sleepStateData: number[] = [];
+  const {deepSleepData, remSleepData, coreSleepData, inBedData, awakeData} =
+    getAllSleepDataForDay(day, data);
+
+  const startTime = new Date(inBedData[0].start);
+  const endTime = new Date(inBedData[inBedData.length - 1].end);
+  endTime.setHours(endTime.getHours() + 1);
+
+  for (
+    let time = startTime;
+    time <= endTime;
+    time.setMinutes(time.getMinutes() + 5)
+  ) {
+    sleepStateData.push(
+      getSleepStateValue(
+        new Date(time),
+        deepSleepData,
+        remSleepData,
+        coreSleepData,
+        inBedData,
+        awakeData,
+      ),
+    );
+  }
+
+  return sleepStateData;
 };

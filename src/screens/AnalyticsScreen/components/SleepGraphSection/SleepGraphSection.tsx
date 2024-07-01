@@ -4,7 +4,7 @@ import Card from '../../../../components/Card';
 import Header from '../../../../components/Header';
 import {DateObject, ProcessedSleepData} from '../../../../utils/types';
 import {LineChart} from 'react-native-chart-kit';
-import {generateLabels} from './utils';
+import {generateLabels, generateSleepStateData} from './utils';
 
 type SleepGraphSectionProps = {
   day: DateObject;
@@ -16,16 +16,13 @@ const SleepGraphSection = ({
   processedSleepData,
 }: SleepGraphSectionProps) => {
   const labels = generateLabels(processedSleepData, day);
-  console.log(labels);
+  const sleepStateData = generateSleepStateData(processedSleepData, day);
+
   const data = {
     labels: labels,
     datasets: [
       {
-        data: [
-          3, 2, 0, 0, 1, 1, 1, 0, 3, 2, 2, 3, 3, 2, 0, 0, 1, 1, 1, 0, 3, 2, 2,
-          3, 3, 2, 0, 0, 1, 1, 1, 0, 3, 2, 2, 3, 3, 2, 0, 0, 1, 1, 1, 0, 3, 2,
-          2, 3,
-        ],
+        data: sleepStateData,
         color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
         strokeWidth: 2,
       },

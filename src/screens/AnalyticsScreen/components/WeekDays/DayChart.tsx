@@ -2,24 +2,17 @@ import React from 'react';
 import {ProgressChart} from 'react-native-chart-kit';
 import {StyleSheet, Text, Dimensions, TouchableOpacity} from 'react-native';
 import {calculateScoreColor} from '../../utils';
-import {DateObject, ProcessedSleepData} from '../../../../utils/types';
-import {calculateScore} from '../../../../utils/utils';
+import {DateObject} from '../../../../utils/types';
 
 type DayChartProps = {
   day: string;
   date: Date;
   isSelected?: boolean;
   onPress?: (day: DateObject) => void;
-  sleepData: ProcessedSleepData;
+  score: number;
 };
 
-const DayChart = ({
-  day,
-  date,
-  isSelected,
-  onPress,
-  sleepData,
-}: DayChartProps) => {
+const DayChart = ({day, date, isSelected, onPress, score}: DayChartProps) => {
   const windowWidth = Dimensions.get('window').width;
   const chartSize = (windowWidth - 40) / 7;
 
@@ -31,8 +24,6 @@ const DayChart = ({
     }
   };
 
-  const newScore = calculateScore(sleepData, {day, date});
-
   return (
     <TouchableOpacity
       style={[styles.container, containerStyle]}
@@ -41,7 +32,7 @@ const DayChart = ({
       <Text style={styles.date}>{date.getDate()}</Text>
       <ProgressChart
         data={{
-          data: [newScore],
+          data: [score],
         }}
         width={chartSize}
         height={chartSize}
@@ -51,7 +42,7 @@ const DayChart = ({
         style={styles.scoreChart}
         chartConfig={{
           decimalPlaces: 2,
-          color: (opacity = 1) => calculateScoreColor(newScore, opacity),
+          color: (opacity = 1) => calculateScoreColor(score, opacity),
           backgroundGradientToOpacity: 0,
           backgroundGradientFromOpacity: 0,
         }}

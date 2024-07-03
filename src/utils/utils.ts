@@ -136,7 +136,7 @@ export const calculateScore = (
   date: DateObject,
 ): number => {
   let score = 0;
-
+  console.log('Calculating score for date:', date.date.toDateString());
   const sleepEfficiency = calculateSleepEfficiency(processedSleepData, date);
   // Sleep efficiency score (50% is 0 points and 100% is 1 point)
   let sleepEfficiencyScore = 0;

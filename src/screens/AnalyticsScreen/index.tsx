@@ -1,10 +1,10 @@
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {View, StyleSheet, ScrollView} from 'react-native';
 import Background from '../../components/Background';
 import WeekDays from './components/WeekDays/WeekDays';
 import ScoreSection from './components/ScoreSection/ScoreSection';
 import {DateObject, ProcessedSleepData} from '../../utils/types';
-import {generateDateRange} from '../../utils/utils';
+import {calculateScore, generateDateRange} from '../../utils/utils';
 import SleepGraphSection from './components/SleepGraphSection/SleepGraphSection';
 
 type AnalyticsScreenProps = {
@@ -20,7 +20,15 @@ const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
     date: new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
   });
 
-  const dateRange = generateDateRange(30, new Date());
+  const dateRange = useMemo(() => generateDateRange(30, new Date()), []);
+
+  const scores = useMemo(() => {
+    console.log('Why is this running?');
+    return dateRange.map(dateObj => {
+      const score = calculateScore(processedSleepData, dateObj);
+      return {dateObj, score};
+    });
+  }, [processedSleepData, dateRange]);
 
   const handleDayChange = (day: DateObject) => {
     setSelectedDay(day);
@@ -32,7 +40,7 @@ const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
         <WeekDays
           days={dateRange}
           onChangeDay={handleDayChange}
-          sleepData={processedSleepData}
+          scores={scores}
         />
         <ScrollView
           style={styles.pageScrollView}

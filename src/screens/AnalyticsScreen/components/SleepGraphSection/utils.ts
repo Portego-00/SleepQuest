@@ -120,7 +120,7 @@ export const generateSleepStateData = (
   for (
     let time = startTime;
     time <= endTime;
-    time.setMinutes(time.getMinutes() + 5)
+    time.setMinutes(time.getMinutes() + 15)
   ) {
     sleepStateData.push(
       getSleepStateValue(

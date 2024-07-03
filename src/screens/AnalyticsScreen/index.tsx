@@ -6,6 +6,7 @@ import ScoreSection from './components/ScoreSection/ScoreSection';
 import {DateObject, ProcessedSleepData} from '../../utils/types';
 import {calculateScore, generateDateRange} from '../../utils/utils';
 import SleepGraphSection from './components/SleepGraphSection/SleepGraphSection';
+import SleepStagesSection from './components/SleepStagesSection/SleepStagesSection';
 
 type AnalyticsScreenProps = {
   processedSleepData: ProcessedSleepData;
@@ -50,6 +51,10 @@ const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
             processedSleepData={processedSleepData}
           />
           <SleepGraphSection
+            day={selectedDay}
+            processedSleepData={processedSleepData}
+          />
+          <SleepStagesSection
             day={selectedDay}
             processedSleepData={processedSleepData}
           />
@@ -100,7 +105,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   bottomSpacer: {
-    height: 100,
+    height: 120,
   },
 });
 

@@ -379,3 +379,9 @@ export const calculateBedtimeConsistency = (
 
   return consistency;
 };
+
+export const formatTime = (timeInMillis: number) => {
+  const hours = Math.floor(timeInMillis / 3600000);
+  const minutes = Math.floor((timeInMillis % 3600000) / 60000);
+  return `${hours}h ${minutes}m`;
+};

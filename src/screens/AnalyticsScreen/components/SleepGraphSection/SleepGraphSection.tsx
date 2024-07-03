@@ -40,7 +40,7 @@ const SleepGraphSection = ({
   const chartConfig = {
     backgroundGradientToOpacity: 0,
     backgroundGradientFromOpacity: 0,
-    decimalPlaces: 2, // optional, defaults to 2dp
+    decimalPlaces: 2,
     color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
     labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
     style: {

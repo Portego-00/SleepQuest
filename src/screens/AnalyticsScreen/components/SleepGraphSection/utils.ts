@@ -13,6 +13,10 @@ export const generateLabels = (data: ProcessedSleepData, day: DateObject) => {
   const labels: string[] = [];
   const inBedData = getSleepDataForDay(day, SleepType.INBED, data);
 
+  if (!inBedData || inBedData.length === 0) {
+    return labels;
+  }
+
   const startHour = new Date(inBedData[0].start).getHours();
   const endHour = new Date(inBedData[inBedData.length - 1].end).getHours() + 1;
 
@@ -104,6 +108,10 @@ export const generateSleepStateData = (
   const sleepStateData: number[] = [];
   const {deepSleepData, remSleepData, coreSleepData, inBedData, awakeData} =
     getAllSleepDataForDay(day, data);
+
+  if (!inBedData || inBedData.length === 0) {
+    return sleepStateData;
+  }
 
   const startTime = new Date(inBedData[0].start);
   const endTime = new Date(inBedData[inBedData.length - 1].end);

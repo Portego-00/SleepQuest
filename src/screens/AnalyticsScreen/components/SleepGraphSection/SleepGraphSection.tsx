@@ -55,32 +55,36 @@ const SleepGraphSection = ({
 
   return (
     <>
-      <Header title="Sleep" />
-      <Card>
-        <LineChart
-          data={data}
-          width={screenWidth * 0.8}
-          height={220}
-          chartConfig={chartConfig}
-          bezier
-          withInnerLines={false}
-          withVerticalLines={false}
-          withHorizontalLines={false}
-          formatYLabel={value => {
-            if (value === '0.00') {
-              return 'Deep';
-            } else if (value === '1.00') {
-              return 'REM';
-            } else if (value === '2.00') {
-              return 'Light';
-            } else if (value === '3.00') {
-              return 'Awake';
-            }
-            return '';
-          }}
-          style={styles.chartStyle}
-        />
-      </Card>
+      {labels.length !== 0 && (
+        <>
+          <Header title="Sleep" />
+          <Card>
+            <LineChart
+              data={data}
+              width={screenWidth * 0.8}
+              height={220}
+              chartConfig={chartConfig}
+              bezier
+              withInnerLines={false}
+              withVerticalLines={false}
+              withHorizontalLines={false}
+              formatYLabel={value => {
+                if (value === '0.00') {
+                  return 'Deep';
+                } else if (value === '1.00') {
+                  return 'REM';
+                } else if (value === '2.00') {
+                  return 'Light';
+                } else if (value === '3.00') {
+                  return 'Awake';
+                }
+                return '';
+              }}
+              style={styles.chartStyle}
+            />
+          </Card>
+        </>
+      )}
     </>
   );
 };

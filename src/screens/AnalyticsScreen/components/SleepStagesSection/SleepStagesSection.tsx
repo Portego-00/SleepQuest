@@ -1,5 +1,5 @@
-import React from 'react';
-import {Dimensions, StyleSheet, View, Text} from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import {StyleSheet, View, Text, Animated} from 'react-native';
 import Card from '../../../../components/Card';
 import Header from '../../../../components/Header';
 import {DateObject, ProcessedSleepData} from '../../../../utils/types';
@@ -33,28 +33,67 @@ const SleepStagesSection = ({
   const coreSleepPercentage = (coreSleepTime / totalTime) * 100;
   const awakePercentage = (awakeTime / totalTime) * 100;
 
+  const animatedWidths = {
+    deepSleep: useRef(new Animated.Value(0)).current,
+    remSleep: useRef(new Animated.Value(0)).current,
+    coreSleep: useRef(new Animated.Value(0)).current,
+    awake: useRef(new Animated.Value(0)).current,
+  };
+
+  useEffect(() => {
+    Animated.timing(animatedWidths.deepSleep, {
+      toValue: deepSleepPercentage,
+      duration: 1000,
+      useNativeDriver: false,
+    }).start();
+    Animated.timing(animatedWidths.remSleep, {
+      toValue: remSleepPercentage,
+      duration: 1000,
+      useNativeDriver: false,
+    }).start();
+    Animated.timing(animatedWidths.coreSleep, {
+      toValue: coreSleepPercentage,
+      duration: 1000,
+      useNativeDriver: false,
+    }).start();
+    Animated.timing(animatedWidths.awake, {
+      toValue: awakePercentage,
+      duration: 1000,
+      useNativeDriver: false,
+    }).start();
+  }, [
+    deepSleepPercentage,
+    remSleepPercentage,
+    coreSleepPercentage,
+    awakePercentage,
+  ]);
+
   const sleepStages = [
     {
       label: 'Deep Sleep',
       time: deepSleepTime,
+      animatedPercentage: animatedWidths.deepSleep,
       percentage: deepSleepPercentage,
       color: styles.deepSleep,
     },
     {
       label: 'Awake',
       time: awakeTime,
+      animatedPercentage: animatedWidths.awake,
       percentage: awakePercentage,
       color: styles.awake,
     },
     {
       label: 'REM Sleep',
       time: remSleepTime,
+      animatedPercentage: animatedWidths.remSleep,
       percentage: remSleepPercentage,
       color: styles.remSleep,
     },
     {
       label: 'Core Sleep',
       time: coreSleepTime,
+      animatedPercentage: animatedWidths.coreSleep,
       percentage: coreSleepPercentage,
       color: styles.coreSleep,
     },
@@ -67,12 +106,17 @@ const SleepStagesSection = ({
         <View style={styles.wrapper}>
           <View style={styles.barContainer}>
             {sleepStages.map((stage, index) => (
-              <View
+              <Animated.View
                 key={index}
                 style={[
                   styles.barSegment,
                   stage.color,
-                  {width: `${stage.percentage}%`},
+                  {
+                    width: stage.animatedPercentage.interpolate({
+                      inputRange: [0, 100],
+                      outputRange: ['0%', '100%'],
+                    }),
+                  },
                 ]}
               />
             ))}

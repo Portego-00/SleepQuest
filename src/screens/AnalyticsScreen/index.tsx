@@ -3,16 +3,25 @@ import {View, StyleSheet, ScrollView} from 'react-native';
 import Background from '../../components/Background';
 import WeekDays from './components/WeekDays/WeekDays';
 import ScoreSection from './components/ScoreSection/ScoreSection';
-import {DateObject, ProcessedSleepData} from '../../utils/types';
+import {
+  DateObject,
+  ProcessedHeartRateData,
+  ProcessedSleepData,
+} from '../../utils/types';
 import {calculateScore, generateDateRange} from '../../utils/utils';
 import SleepGraphSection from './components/SleepGraphSection/SleepGraphSection';
 import SleepStagesSection from './components/SleepStagesSection/SleepStagesSection';
+import HeartRateSection from './components/HeartRateSection/HeartRateSection';
 
 type AnalyticsScreenProps = {
   processedSleepData: ProcessedSleepData;
+  processedHeartRateData: ProcessedHeartRateData;
 };
 
-const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
+const AnalyticsScreen = ({
+  processedSleepData,
+  processedHeartRateData,
+}: AnalyticsScreenProps) => {
   const [selectedDay, setSelectedDay] = useState<DateObject>({
     day: new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toLocaleString(
       'en-us',
@@ -57,6 +66,11 @@ const AnalyticsScreen = ({processedSleepData}: AnalyticsScreenProps) => {
           <SleepStagesSection
             day={selectedDay}
             processedSleepData={processedSleepData}
+          />
+          <HeartRateSection
+            day={selectedDay}
+            processedSleepData={processedSleepData}
+            processedHeartRateData={processedHeartRateData}
           />
           <View style={styles.bottomSpacer} />
         </ScrollView>

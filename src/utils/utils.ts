@@ -1,5 +1,10 @@
 import {HealthValue} from 'react-native-health';
-import {DateObject, ProcessedSleepData, SleepInterval} from './types';
+import {
+  DateObject,
+  ProcessedHeartRateData,
+  ProcessedSleepData,
+  SleepInterval,
+} from './types';
 
 export const mergeIntervals = (intervals: SleepInterval[]): SleepInterval[] => {
   if (intervals.length === 0) {
@@ -384,4 +389,47 @@ export const formatTime = (timeInMillis: number) => {
   const hours = Math.floor(timeInMillis / 3600000);
   const minutes = Math.floor((timeInMillis % 3600000) / 60000);
   return `${hours}h ${minutes}m`;
+};
+
+export function getProcessedHeartRateData(
+  data: HealthValue[],
+): ProcessedHeartRateData {
+  return data.reduce((acc: ProcessedHeartRateData, entry: HealthValue) => {
+    const dateKey = new Date(entry.startDate).toISOString();
+    acc[dateKey] = entry.value;
+    return acc;
+  }, {});
+}
+
+export const getSleepRangeForDay = (
+  day: DateObject,
+  processedSleepData: ProcessedSleepData,
+): {startTime: Date; endTime: Date} => {
+  const sleepData = getSleepDataForDay(
+    day,
+    SleepType.INBED,
+    processedSleepData,
+  );
+  if (!sleepData || sleepData.length === 0) {
+    return {startTime: new Date(), endTime: new Date()};
+  }
+  const firstInterval = sleepData[0];
+  const lastInterval = sleepData[sleepData.length - 1];
+  return {
+    startTime: new Date(firstInterval.start),
+    endTime: new Date(lastInterval.end),
+  };
+};
+
+export const getHeartRateDataForRange = (
+  startTime: Date,
+  endTime: Date,
+  processedHeartRateData: ProcessedHeartRateData,
+) => {
+  const start = startTime.toISOString();
+  const end = endTime.toISOString();
+
+  return Object.entries(processedHeartRateData).filter(([date, _value]) => {
+    return date >= start && date <= end;
+  });
 };

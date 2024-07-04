@@ -7,15 +7,21 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import AnalyticsScreen from './src/screens/AnalyticsScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AppleHealthKit, {HealthValue} from 'react-native-health';
-import {ProcessedSleepData} from './src/utils/types';
-import {getProcessedSleepData} from './src/utils/utils';
+import {ProcessedHeartRateData, ProcessedSleepData} from './src/utils/types';
+import {
+  getProcessedHeartRateData,
+  getProcessedSleepData,
+} from './src/utils/utils';
 import HomeScreen from './src/screens/HomeScreen';
 import Background from './src/components/Background';
 import LeaderboardScreen from './src/screens/LeaderboardScreen';
 
 const permissions = {
   permissions: {
-    read: [AppleHealthKit.Constants.Permissions.SleepAnalysis],
+    read: [
+      AppleHealthKit.Constants.Permissions.SleepAnalysis,
+      AppleHealthKit.Constants.Permissions.HeartRate,
+    ],
     write: [],
   },
 };
@@ -37,9 +43,16 @@ const HomeTabScreen = ({sleepData}: {sleepData: HealthValue[]}) => (
 );
 const AnalyticsTabScreen = ({
   processedSleepData,
+  processedHeartRateData,
 }: {
   processedSleepData: ProcessedSleepData;
-}) => <AnalyticsScreen processedSleepData={processedSleepData} />;
+  processedHeartRateData: ProcessedHeartRateData;
+}) => (
+  <AnalyticsScreen
+    processedSleepData={processedSleepData}
+    processedHeartRateData={processedHeartRateData}
+  />
+);
 
 const LeaderboardTabScreen = ({
   processedSleepData,
@@ -51,8 +64,11 @@ const Tab = createBottomTabNavigator();
 
 function App(): React.JSX.Element {
   const [sleepData, setSleepData] = useState<HealthValue[]>([]);
+  const [heartRateData, setHeartRateData] = useState<HealthValue[]>([]);
   const [processedSleepData, setProcessedSleepData] =
     useState<ProcessedSleepData>({});
+  const [processedHeartRateData, setProcessedHeartRateData] =
+    useState<ProcessedHeartRateData>({});
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
@@ -84,6 +100,18 @@ function App(): React.JSX.Element {
         setSleepData(results);
         setProcessedSleepData(getProcessedSleepData(results));
       });
+
+      AppleHealthKit.getHeartRateSamples(
+        options,
+        (getSamplesError, results) => {
+          if (err) {
+            console.log('error fetching heart rate data: ', getSamplesError);
+            return;
+          }
+          setHeartRateData(results);
+          setProcessedHeartRateData(getProcessedHeartRateData(results));
+        },
+      );
     });
   }, []);
 
@@ -129,6 +157,7 @@ function App(): React.JSX.Element {
               <AnalyticsTabScreen
                 {...props}
                 processedSleepData={processedSleepData}
+                processedHeartRateData={processedHeartRateData}
               />
             )}
           </Tab.Screen>

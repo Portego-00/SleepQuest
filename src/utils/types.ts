@@ -11,3 +11,7 @@ export interface DateObject {
   day: string;
   date: Date;
 }
+
+export interface ProcessedHeartRateData {
+  [key: string]: number;
+}

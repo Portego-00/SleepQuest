@@ -28,16 +28,27 @@ const SleepStagesSection = ({
 
   const totalTime = deepSleepTime + remSleepTime + coreSleepTime + awakeTime;
 
-  const deepSleepPercentage = (deepSleepTime / totalTime) * 100;
-  const remSleepPercentage = (remSleepTime / totalTime) * 100;
-  const coreSleepPercentage = (coreSleepTime / totalTime) * 100;
-  const awakePercentage = (awakeTime / totalTime) * 100;
+  let deepSleepPercentage = 0;
+  let remSleepPercentage = 0;
+  let coreSleepPercentage = 0;
+  let awakePercentage = 0;
+  let undefinedPercentage = 0;
+
+  if (totalTime !== 0) {
+    deepSleepPercentage = (deepSleepTime / totalTime) * 100;
+    remSleepPercentage = (remSleepTime / totalTime) * 100;
+    coreSleepPercentage = (coreSleepTime / totalTime) * 100;
+    awakePercentage = (awakeTime / totalTime) * 100;
+  } else {
+    undefinedPercentage = 100;
+  }
 
   const animatedWidths = {
     deepSleep: useRef(new Animated.Value(0)).current,
     remSleep: useRef(new Animated.Value(0)).current,
     coreSleep: useRef(new Animated.Value(0)).current,
     awake: useRef(new Animated.Value(0)).current,
+    undefined: useRef(new Animated.Value(0)).current,
   };
 
   useEffect(() => {
@@ -61,11 +72,22 @@ const SleepStagesSection = ({
       duration: 1000,
       useNativeDriver: false,
     }).start();
+    Animated.timing(animatedWidths.undefined, {
+      toValue: undefinedPercentage,
+      duration: 1000,
+      useNativeDriver: false,
+    }).start();
   }, [
     deepSleepPercentage,
     remSleepPercentage,
     coreSleepPercentage,
     awakePercentage,
+    undefinedPercentage,
+    animatedWidths.awake,
+    animatedWidths.coreSleep,
+    animatedWidths.deepSleep,
+    animatedWidths.remSleep,
+    animatedWidths.undefined,
   ]);
 
   const sleepStages = [
@@ -97,6 +119,13 @@ const SleepStagesSection = ({
       percentage: coreSleepPercentage,
       color: styles.coreSleep,
     },
+    {
+      label: 'Undefined',
+      time: 0,
+      animatedPercentage: animatedWidths.undefined,
+      percentage: 0,
+      color: styles.undefinedColor,
+    },
   ];
 
   return (
@@ -105,39 +134,60 @@ const SleepStagesSection = ({
       <Card>
         <View style={styles.wrapper}>
           <View style={styles.barContainer}>
-            {sleepStages.map((stage, index) => (
+            {totalTime === 0 && (
               <Animated.View
-                key={index}
                 style={[
                   styles.barSegment,
-                  stage.color,
+                  sleepStages[4].color,
                   {
-                    width: stage.animatedPercentage.interpolate({
+                    width: sleepStages[4].animatedPercentage.interpolate({
                       inputRange: [0, 100],
                       outputRange: ['0%', '100%'],
                     }),
                   },
                 ]}
               />
-            ))}
+            )}
+            {totalTime !== 0 &&
+              sleepStages.map((stage, index) => (
+                <Animated.View
+                  key={index}
+                  style={[
+                    styles.barSegment,
+                    stage.color,
+                    {
+                      width: stage.animatedPercentage.interpolate({
+                        inputRange: [0, 100],
+                        outputRange: ['0%', '100%'],
+                      }),
+                    },
+                  ]}
+                />
+              ))}
           </View>
         </View>
         <View style={styles.detailsContainer}>
-          {sleepStages.map((stage, index) => (
-            <View key={index} style={styles.detailItem}>
-              <View style={[styles.circle, stage.color]} />
-              <View style={styles.detailContent}>
-                <Text style={styles.labelText}>{stage.label}</Text>
-                <View style={{flexDirection: 'row'}}>
-                  <Text style={styles.timeText}>{formatTime(stage.time)}</Text>
-                  <Text
-                    style={
-                      styles.percentageText
-                    }>{`  ${stage.percentage.toFixed(1)}%`}</Text>
+          {totalTime === 0 && (
+            <Text style={styles.noDataTextStyle}>No sleep data available</Text>
+          )}
+          {totalTime !== 0 &&
+            sleepStages.map((stage, index) => (
+              <View key={index} style={styles.detailItem}>
+                <View style={[styles.circle, stage.color]} />
+                <View style={styles.detailContent}>
+                  <Text style={styles.labelText}>{stage.label}</Text>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={styles.timeText}>
+                      {formatTime(stage.time)}
+                    </Text>
+                    <Text
+                      style={
+                        styles.percentageText
+                      }>{`  ${stage.percentage.toFixed(1)}%`}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          ))}
+            ))}
         </View>
       </Card>
     </>
@@ -172,6 +222,9 @@ const styles = StyleSheet.create({
   },
   awake: {
     backgroundColor: '#ff6361',
+  },
+  undefinedColor: {
+    backgroundColor: 'rgba(67,67,67,1)',
   },
   detailsContainer: {
     flexDirection: 'row',
@@ -209,6 +262,12 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     marginRight: 10,
+  },
+  noDataTextStyle: {
+    fontFamily: 'Nunito-Regular',
+    color: '#D2D5D9',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 

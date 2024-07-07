@@ -84,9 +84,7 @@ const HeartRateSection = ({
               color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
               labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
               propsForDots: {
-                r: '2',
-                strokeWidth: '4',
-                stroke: '#cc0000',
+                r: '0',
               },
             }}
             bezier

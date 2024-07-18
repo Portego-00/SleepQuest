@@ -275,19 +275,17 @@ export const calculateSleepEfficiency = (
   processedSleepData: ProcessedSleepData,
   currentDate: DateObject,
 ): number => {
-  const {deepSleepData, remSleepData, coreSleepData, inBedData, awakeData} =
+  const {deepSleepData, remSleepData, coreSleepData, awakeData} =
     getAllSleepDataForDay(currentDate, processedSleepData);
 
   const deepSleepTime = calculateTotalTime(deepSleepData);
   const remSleepTime = calculateTotalTime(remSleepData);
   const coreSleepTime = calculateTotalTime(coreSleepData);
-  const inBedTime = calculateTotalTime(inBedData);
   const awakeTime = calculateTotalTime(awakeData);
 
-  if (inBedTime === 0) return 0;
-
   const totalSleepTime = deepSleepTime + remSleepTime + coreSleepTime;
-  const sleepEfficiency = totalSleepTime / (inBedTime + awakeTime);
+  if (totalSleepTime === 0) return 0;
+  const sleepEfficiency = totalSleepTime / (totalSleepTime + awakeTime);
 
   return sleepEfficiency;
 };

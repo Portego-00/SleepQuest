@@ -86,9 +86,7 @@ function App(): React.JSX.Element {
 
       // Fetch sleep data for the past week
       const options = {
-        startDate: new Date(
-          Date.now() - 30 * 24 * 60 * 60 * 1000,
-        ).toISOString(), // 30 days ago
+        startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
         endDate: new Date().toISOString(),
       };
 

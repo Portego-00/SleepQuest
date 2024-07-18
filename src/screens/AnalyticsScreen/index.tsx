@@ -30,10 +30,9 @@ const AnalyticsScreen = ({
     date: new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
   });
 
-  const dateRange = useMemo(() => generateDateRange(30, new Date()), []);
+  const dateRange = useMemo(() => generateDateRange(7, new Date()), []);
 
   const scores = useMemo(() => {
-    console.log('Why is this running?');
     return dateRange.map(dateObj => {
       const score = calculateScore(processedSleepData, dateObj);
       return {dateObj, score};

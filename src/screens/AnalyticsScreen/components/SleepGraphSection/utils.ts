@@ -11,7 +11,7 @@ import {
 
 export const generateLabels = (data: ProcessedSleepData, day: DateObject) => {
   const labels: string[] = [];
-  const inBedData = getSleepDataForDay(day, SleepType.INBED, data);
+  const inBedData = getSleepDataForDay(day, SleepType.CORE, data);
 
   if (!inBedData || inBedData.length === 0) {
     return labels;
@@ -90,14 +90,14 @@ const getSleepStateValue = (
   if (isDeepSleep) {
     return SLEEP_TYPE_VALUES[SleepType.DEEP];
   }
-  const isInBed = inBedData.some(
-    interval =>
-      timestamp >= new Date(interval.start) &&
-      timestamp < new Date(interval.end),
-  );
-  if (isInBed) {
-    return SLEEP_TYPE_VALUES[SleepType.INBED];
-  }
+  // const isInBed = inBedData.some(
+  //   interval =>
+  //     timestamp >= new Date(interval.start) &&
+  //     timestamp < new Date(interval.end),
+  // );
+  // if (isInBed) {
+  //   return SLEEP_TYPE_VALUES[SleepType.INBED];
+  // }
   return SLEEP_TYPE_VALUES[SleepType.INBED];
 };
 
@@ -109,12 +109,12 @@ export const generateSleepStateData = (
   const {deepSleepData, remSleepData, coreSleepData, inBedData, awakeData} =
     getAllSleepDataForDay(day, data);
 
-  if (!inBedData || inBedData.length === 0) {
+  if (!coreSleepData || coreSleepData.length === 0) {
     return sleepStateData;
   }
 
-  const startTime = new Date(inBedData[0].start);
-  const endTime = new Date(inBedData[inBedData.length - 1].end);
+  const startTime = new Date(coreSleepData[0].start);
+  const endTime = new Date(coreSleepData[coreSleepData.length - 1].end);
   endTime.setHours(endTime.getHours() + 1);
 
   for (

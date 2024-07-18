@@ -33,6 +33,10 @@ const HeartRateSection = ({
     processedHeartRateData,
   );
 
+  if (heartRateData.length === 0) {
+    return null;
+  }
+
   const screenWidth = Dimensions.get('window').width;
 
   const hours = generateLabels(processedSleepData, day);
@@ -49,16 +53,16 @@ const HeartRateSection = ({
       {
         data: [
           heartRateData
-            .map(([, value]) => value)
-            .reduce((a, b) => Math.max(a, b)) + 5,
+            ?.map(([, value]) => value)
+            ?.reduce((a, b) => Math.max(a, b)) + 5,
         ],
         withDots: false,
       },
       {
         data: [
           heartRateData
-            .map(([, value]) => value)
-            .reduce((a, b) => Math.min(a, b)) - 5,
+            ?.map(([, value]) => value)
+            ?.reduce((a, b) => Math.min(a, b)) - 5,
         ],
         withDots: false,
       },

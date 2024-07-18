@@ -134,36 +134,21 @@ const SleepStagesSection = ({
       <Card>
         <View style={styles.wrapper}>
           <View style={styles.barContainer}>
-            {totalTime === 0 && (
+            {sleepStages.map((stage, index) => (
               <Animated.View
+                key={index}
                 style={[
                   styles.barSegment,
-                  sleepStages[4].color,
+                  stage.color,
                   {
-                    width: sleepStages[4].animatedPercentage.interpolate({
+                    width: stage.animatedPercentage.interpolate({
                       inputRange: [0, 100],
                       outputRange: ['0%', '100%'],
                     }),
                   },
                 ]}
               />
-            )}
-            {totalTime !== 0 &&
-              sleepStages.map((stage, index) => (
-                <Animated.View
-                  key={index}
-                  style={[
-                    styles.barSegment,
-                    stage.color,
-                    {
-                      width: stage.animatedPercentage.interpolate({
-                        inputRange: [0, 100],
-                        outputRange: ['0%', '100%'],
-                      }),
-                    },
-                  ]}
-                />
-              ))}
+            ))}
           </View>
         </View>
         <View style={styles.detailsContainer}>
@@ -171,7 +156,7 @@ const SleepStagesSection = ({
             <Text style={styles.noDataTextStyle}>No sleep data available</Text>
           )}
           {totalTime !== 0 &&
-            sleepStages.map((stage, index) => (
+            sleepStages.slice(0, 4).map((stage, index) => (
               <View key={index} style={styles.detailItem}>
                 <View style={[styles.circle, stage.color]} />
                 <View style={styles.detailContent}>

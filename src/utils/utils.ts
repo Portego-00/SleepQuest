@@ -403,11 +403,7 @@ export const getSleepRangeForDay = (
   day: DateObject,
   processedSleepData: ProcessedSleepData,
 ): {startTime: Date; endTime: Date} => {
-  const sleepData = getSleepDataForDay(
-    day,
-    SleepType.INBED,
-    processedSleepData,
-  );
+  const sleepData = getSleepDataForDay(day, SleepType.CORE, processedSleepData);
   if (!sleepData || sleepData.length === 0) {
     return {startTime: new Date(), endTime: new Date()};
   }

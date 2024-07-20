@@ -98,7 +98,7 @@ const getSleepStateValue = (
   // if (isInBed) {
   //   return SLEEP_TYPE_VALUES[SleepType.INBED];
   // }
-  return SLEEP_TYPE_VALUES[SleepType.INBED];
+  return SLEEP_TYPE_VALUES[SleepType.AWAKE];
 };
 
 export const generateSleepStateData = (

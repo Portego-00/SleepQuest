@@ -58,11 +58,11 @@ const AnalyticsScreen = ({
             day={selectedDay}
             processedSleepData={processedSleepData}
           />
-          <SleepGraphSection
+          <SleepStagesSection
             day={selectedDay}
             processedSleepData={processedSleepData}
           />
-          <SleepStagesSection
+          <SleepGraphSection
             day={selectedDay}
             processedSleepData={processedSleepData}
           />
